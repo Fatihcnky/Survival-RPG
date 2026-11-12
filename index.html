@@ -10,9 +10,9 @@ html,body{margin:0;height:100%;overflow:hidden;background:#111;font-family:syste
 #c{position:absolute;inset:0;width:100%;height:100%;display:block}
 #top{position:absolute;top:0;left:0;right:0;padding:4px 8px;background:rgba(0,0,0,.68);font-size:13px;line-height:1.55;pointer-events:none}
 #top span{margin-right:10px;white-space:nowrap}
-#mm{position:absolute;right:6px;top:52px;border:2px solid #000b;width:128px;height:96px;background:#000;image-rendering:pixelated}
+#mm{position:absolute;right:6px;top:52px;border:2px solid #000b;width:96px;height:96px;background:#000;image-rendering:pixelated}
 #log{position:absolute;left:6px;top:52px;max-width:58%;font-size:12px;pointer-events:none}
-#log div{background:rgba(0,0,0,.65);padding:3px 8px;margin-bottom:3px;border-radius:6px;animation:f 10s forwards}
+#log div{pointer-events:auto;background:rgba(0,0,0,.65);padding:3px 8px;margin-bottom:3px;border-radius:6px;animation:f 10s forwards}
 @keyframes f{0%,85%{opacity:1}100%{opacity:0}}
 #hint{position:absolute;left:0;right:0;bottom:56px;text-align:center;display:none}
 #hint span{background:rgba(0,0,0,.75);padding:6px 10px;border-radius:8px;font-size:13px;margin-right:6px}
@@ -37,13 +37,20 @@ button.dis{opacity:.4}
 <body>
 <canvas id="c"></canvas>
 <div id="top"></div>
-<canvas id="mm" width="128" height="96"></canvas>
+<canvas id="mm" width="96" height="96"></canvas>
 <div id="log"></div>
-<div id="hint"><span id="hinttxt"></span><button data-a="cancel">İptal</button></div>
+<div id="hint"><span id="hinttxt"></span><span id="hintbtn"></span></div>
 <div id="selinfo"></div>
 <div id="panel"></div>
 <div id="bar"></div>
 <div id="modal"><div class="box"><h3 id="mt"></h3><p id="mb"></p><div id="mbtn"></div></div></div>
-<script src="game.js"></script>
+<script src="js/data.js"></script>
+<script src="js/core.js"></script>
+<script src="js/units.js"></script>
+<script src="js/sim.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/render.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/input.js"></script>
 </body>
 </html>
