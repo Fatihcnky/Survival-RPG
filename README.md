@@ -16,3 +16,6 @@ Repoya her push'ta GitHub Actions oyunu otomatik APK'ya çevirir:
 - `js/sim.js` ekonomi, çağ/ünvan, kayıt
 - `js/ai.js` olaylar, haydut baskınları, krallar, pazar
 - `js/render.js`, `js/ui.js`, `js/input.js` çizim ve arayüz
+
+## Görseller
+Bina, birim, ağaç ve zemin görselleri Kenney'nin "RTS Pack: Medieval" paketindendir (CC0, kenney.nl). Lisans: `img/LICENSE-Kenney.txt`.
