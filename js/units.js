@@ -69,10 +69,10 @@ function startJob(u){
   u.st='toWork';
  }
 }
-function findPrey(b){
+function findPrey(b,u){
  let best=null,bd=2025;
  const cx=b.x+b.w/2,cy=b.y+b.h/2;
- for(const q of S.units){if(q.dead||q.team!=='w'||!UT[q.t].food)continue;const d=(q.x-cx)**2+(q.y-cy)**2;if(d<bd){bd=d;best=q;}}
+ for(const q of S.units){if(q.dead||q.team!=='w'||!UT[q.t].food)continue;if(u&&u.skip&&u.skip[q.id]>S.t)continue;const d=(q.x-cx)**2+(q.y-cy)**2;if(d<bd){bd=d;best=q;}}
  return best;
 }
 function findFire(st){
@@ -89,7 +89,7 @@ function workTick(u,dt){
  else if(j==='herd')addRes('food',0.065*dt*HERDS[s]*hm);
  else if(j==='trade')addRes('gold',0.07*dt*fxm('trade')*(1+0.25*pactCount())*hm);
  else if(j==='smith'){u.tm+=dt;if(u.tm>=12){if(S.res.iron>=2&&S.res.wood>=2){S.res.iron-=2;S.res.wood-=2;addRes('silah',1);u.tm=0;}else u.tm=11;}}
- else if(j==='hunt'){u.fs-=dt;if(u.fs<=0){u.fs=2;const pr=findPrey(b);if(pr){u.pr=pr.id;u.st='hunt';u.path=null;u.cd=0;u.rp=0;}}}
+ else if(j==='hunt'){u.fs-=dt;if(u.fs<=0){u.fs=2;const pr=findPrey(b,u);if(pr){u.pr=pr.id;u.st='hunt';u.path=null;u.cd=0;u.rp=0;}}}
  else if(j==='fire'){
   u.fs-=dt;
   if(u.fs<=0){u.fs=1;const f=findFire(b);if(f&&setPath(u,f.x,f.y,f.w,f.h,1,false)===1){u.ft=f.id;u.st='toFire';}}
@@ -150,7 +150,7 @@ function updVillager(u,dt){
     }
    }else{
     u.rp-=dt;
-    if(!u.path||u.rp<=0){u.rp=1.2;if(setPath(u,Math.floor(pr.x),Math.floor(pr.y),1,1,4,true)===0){u.st='idle';u.wait=2;break;}}
+    if(!u.path||u.rp<=0){u.rp=1.2;const r=setPath(u,Math.floor(pr.x),Math.floor(pr.y),1,1,4,true);if(r===0||(r===1&&u.path&&u.path.length===0&&dist>6.5)){u.skip=u.skip||{};u.skip[pr.id]=S.t+90;u.pr=0;u.st='idle';u.wait=1;break;}}
     if(u.path)walkTo(u,dt);
    }
    break;}
@@ -219,7 +219,7 @@ function alertDefenders(a,e){
 }
 function damage(e,dmg,a){
  if(e.hp<=0)return;
- e.hp-=dmg;
+ e.hp-=dmg;e.fl=S.t;
  if(a&&e.team==='p'&&(a.team==='b'||a.team==='k')&&(e.w||e.t==='koylu'))alertDefenders(a,e);
  if(e.hp<=0){if(e.w)destroyB(e,a);else killU(e,a);}
  else if(!e.w&&a&&!e.tg&&e.t!=='koylu'&&e.st!=='move')e.tg=a.id;

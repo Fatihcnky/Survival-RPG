@@ -152,7 +152,7 @@ function pDyn(){
  if(D.crisis>0)h+='<div style="color:#ff8a80">⚠ Hanedan krizi sürüyor.</div>';
  const hp=Math.round(S.happy);
  h+='<h4>🙂 Halk mutluluğu: '+hp+' '+bar(hp/100)+'</h4><small>'+(hp>=65?'Göçmenler gelir, verim yüksek.':hp<20?'Halk isyana yakın!':'Verim: x'+happyMul().toFixed(2))+'</small>';
- h+='<div style="font-size:12px;margin:3px 0">'+happyFactors().map(x=>'<span style="color:'+(x[1]>=0?'#9be59b':'#ff9a9a')+';margin-right:8px;white-space:nowrap">'+x[0]+' '+(x[1]>0?'+':'')+x[1]+'</span>').join('')+'</div>';
+ h+='<div style="font-size:12px;margin:3px 0">'+happyFactors().map(x=>'<span style="color:'+(x[1]>=0?'#9be59b':'#ff9a9a')+';margin-right:8px;display:inline-block">'+x[0]+' '+(x[1]>0?'+':'')+x[1]+'</span>').join('')+'</div>';
  h+='<div class="row">'+btn('💰 Vergi: '+TAXN[S.taxRate],'tax')+'<small>Düşük: mutluluk +8, gelir x0.5 · Yüksek: mutluluk -12, gelir x1.8</small></div>';
  h+='<div class="row">'+btn('🎉 Şenlik (80🍖 30💰)','fest',null,D.festCool>0||S.res.food<80||S.res.gold<30)+'<small>'+(D.festCool>0?'Bekleme: '+D.festCool+' gün':'6 gün mutluluk +15')+'</small></div>';
  return h;
@@ -160,7 +160,7 @@ function pDyn(){
 function pQuest(){
  const s=STORY[S.story];
  let h='<h4>📜 Görev '+Math.min(S.story+1,STORY.length)+'/'+STORY.length+'</h4>';
- h+=s?'<div>'+s.t+(s.r?'<br><small>Ödül: '+costText(s.r)+'</small>':'')+'</div>':'<div>Tüm görevleri tamamladın! 🏆</div>';
+ h+=s?'<div>'+(s.ch?'<b>'+s.ch+'</b><br>':'')+s.t+(s.r?'<br><small>Ödül: '+costText(s.r)+'</small>':'')+'</div>':'<div>Tüm görevleri tamamladın! 🏆</div>';
  return h;
 }
 function pSel(){

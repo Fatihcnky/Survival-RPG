@@ -73,8 +73,8 @@ const UT={
  haydut:{n:'Haydut',g:'🗡',hp:55,atk:8,rng:1.3,rof:1.1,spd:2.2,arm:1},
  haydutokcu:{n:'Haydut Okçu',g:'🏹',hp:35,atk:6,rng:5.5,rof:1.5,spd:2.2,arm:0,ranged:1},
  haydutatli:{n:'Atlı Haydut',g:'🐎',hp:80,atk:10,rng:1.4,rof:1.1,spd:3.4,arm:1,cav:1},
- geyik:{n:'Geyik',g:'🦌',hp:25,atk:0,rng:1,rof:9,spd:3.2,arm:0,wild:1,food:25},
- domuz:{n:'Yaban Domuzu',g:'🐗',hp:50,atk:9,rng:1.2,rof:1.2,spd:2.6,arm:0,wild:1,food:45},
+ geyik:{n:'Geyik',g:'🦌',hp:25,atk:0,rng:1,rof:9,spd:3.2,arm:0,wild:1,food:35},
+ domuz:{n:'Yaban Domuzu',g:'🐗',hp:50,atk:9,rng:1.2,rof:1.2,spd:2.6,arm:0,wild:1,food:60},
  kurt:{n:'Kurt',g:'🐺',hp:42,atk:8,rng:1.2,rof:1.0,spd:3.2,arm:0,wild:1,aggr:1},
  haydutreis:{n:'Haydut Reisi',g:'🪓',hp:170,atk:15,rng:1.4,rof:1.1,spd:2.2,arm:3}
 };
@@ -121,16 +121,24 @@ const KINGS=[
  {n:'Güneybatı Hanedanı',who:'Leydi Elara',x:28,y:132,pers:'dost',col:'#40b8b0',d:'Bilgece yöneten, tüccarlara dost bir hanedan.',fam:['Prenses Iris','Prens Lucan']}
 ];
 const STORY=[
- {t:'Köyünü kur: haritada gez, uygun bir yer bul ve "Köyü Kur" düğmesine bas.',ok:()=>S.founded,m:'Sürgün kafilesi nihayet yurt tuttu. Ateş yakıldı, ilk çadırlar kuruldu.'},
- {t:'4 ev (hane) inşa et.',ok:()=>countB('ev',true)>=4,r:{wood:100},m:'Aileler çatı altına girdi. Köy artık bir köy gibi görünüyor.'},
- {t:'Kışa hazırlan: 150 odun ve 220 yiyecek biriktir.',ok:()=>S.res.wood>=150&&S.res.food>=220,r:{food:60},m:'Ambarlar doldu. Yaşlılar "bu yıl kış sert olacak" diyor.'},
- {t:"Bronz Çağı'na geç.",ok:()=>S.age>=1,r:{gold:60},m:'Demirciler bronzu dövmeyi öğrendi. Yeni bir çağ başladı.'},
+ {ch:'Bölüm 1 — Sürgün',t:'Köyünü kur: haritada gez, uygun bir yer bul ve "Köyü Kur" düğmesine bas.',ok:()=>S.founded,m:'Sürgün kafilesi nihayet yurt tuttu. Ateş yakıldı, ilk çadırlar kuruldu. Yaşlılar bu toprakların bereketli olduğunu söylüyor.'},
+ {t:'4 ev (hane) inşa et.',ok:()=>countB('ev',true)>=4,r:{wood:100},m:'Aileler çatı altına girdi. Çocukların kahkahası köyü doldurdu.'},
+ {t:'Bir Avcı Kulübesi kur ve 3 av getir (avcılar ormanlara dikkat etmeli, kurtlar var).',ok:()=>countB('avci',true)>=1&&(S.stats.hunted||0)>=3,r:{food:80},m:'Av etinin kokusu sofraları şenlendirdi. Avcılar "ormanda kurtlar dolaşıyor" diye uyarıyor.'},
+ {ch:'Bölüm 2 — İlk Kış',t:'Kışa hazırlan: 250 odun ve 300 yiyecek biriktir.',ok:()=>S.res.wood>=250&&S.res.food>=300,r:{food:80},m:'Ambarlar doldu. Yaşlılar "bu kış uzun olacak" diyor.'},
+ {t:'İlk kışı atlat: bir yıl hayatta kal ve en az 12 nüfusa ulaş.',ok:()=>S.day>=SEASON_DAYS*4&&popNow()>=12,r:{gold:80},m:'Karlar eridi, köy ayakta kaldı! İlk yılını tamamladın.'},
+ {t:'Savunmaya geç: 1 gözcü kulesi kur ve 5 okçu eğit.',ok:()=>(countB('kule',true)+countB('tkule',true))>=1&&S.units.filter(u=>u.team==='p'&&u.t==='okcu'&&!u.dead).length>=5,r:{wood:150,stone:60},m:'Kulelerin tepesindeki nöbetçiler ufku gözetliyor. Haydutlar artık kolay lokma bulamayacak.'},
+ {ch:'Bölüm 3 — Bronz ve Kan',t:"Bronz Çağı'na geç.",ok:()=>S.age>=1,r:{gold:60},m:'Demirciler bronzu dövmeyi öğrendi. Yeni bir çağ başladı.'},
  {t:'İlk haydut kampını yok et.',ok:()=>S.stats.camps>=1,r:{gold:100,iron:40},m:'Haydutların yuvası yıkıldı. Yollar biraz daha güvenli.'},
  {t:'Elçilik kur ve bir komşuyla ticaret anlaşması yap.',ok:()=>S.kings.some(k=>k.pact),r:{gold:100},m:'Komşular artık seni tanıyor. Kervanlar yola çıktı.'},
+ {ch:'Bölüm 4 — Hanedan',t:'Hanedanını güçlendir: bir komşu hanedanla evlen.',ok:()=>!!S.dyn.spouse,r:{gold:150},m:'Çanlar çaldı, düğün şenliği günlerce sürdü. İki hanedan artık akraba.'},
+ {t:'Şapel kur ve halk mutluluğunu 70\'e çıkar.',ok:()=>countB('sapel',true)>=1&&S.happy>=70,r:{food:120,gold:80},m:'Halk, hükümdarına minnet duyuyor. Sokaklarda şarkılar söyleniyor.'},
  {t:'"Kale" ünvanına yüksel.',ok:()=>S.rank>=1,r:{stone:150},m:'Surların gölgesinde yeni bir hayat başladı.'},
- {t:"Demir Çağı'na geç ve bir Hastane kur.",ok:()=>S.age>=2&&countB('hastane',true)>=1,r:{gold:150},m:'Demir, hem kılıcı hem pulluğu güçlendirdi.'},
+ {t:'Bir varis sahibi ol (hanedanın devamı için).',ok:()=>S.dyn.heirs.length>=1,r:{gold:120},m:'Beşikte uyuyan çocuk, hanedanın geleceği. Halk yeni umutla doluyor.'},
+ {ch:'Bölüm 5 — Demir Çağı',t:"Demir Çağı'na geç ve bir Hastane kur.",ok:()=>S.age>=2&&countB('hastane',true)>=1,r:{gold:150},m:'Demir, hem kılıcı hem pulluğu güçlendirdi.'},
+ {t:'3 haydut kampını yok et.',ok:()=>S.stats.camps>=3,r:{gold:250,iron:120},m:'Haydut reisleri senin adını duyunca titriyor. Yollar kervanlara açık.'},
  {t:'"Şehir" ol.',ok:()=>S.rank>=2,r:{gold:200,food:200},m:'Pazar yerleri şenlendi, şehir kuruldu!'},
- {t:"Orta Çağ'a geç ve bir komşuyla ittifak kur.",ok:()=>S.age>=3&&S.kings.some(k=>k.pact==='ittifak'),r:{gold:250},m:'Dostların çoğaldı, düşmanların saygı duymaya başladı.'},
- {t:'"Lordluk" ünvanını kazan.',ok:()=>S.rank>=3,r:{gold:400},m:'Artık topraklarının efendisisin, lord.'},
- {t:'Krallığını ilan et: "Krallık" ünvanına yüksel.',ok:()=>S.rank>=4,m:'Taç giydin. Sürgünden krallığa uzanan yol tamamlandı!'}
+ {ch:'Bölüm 6 — Orta Çağ',t:"Orta Çağ'a geç ve bir komşuyla ittifak kur.",ok:()=>S.age>=3&&S.kings.some(k=>k.pact==='ittifak'),r:{gold:250},m:'Dostların çoğaldı, düşmanların saygı duymaya başladı.'},
+ {t:'"Lordluk" ünvanını kazan.',ok:()=>S.rank>=3,r:{gold:400},m:'Artık topraklarının efendisisin.'},
+ {t:'Nüfusunu 100\'e çıkar.',ok:()=>popNow()>=100,r:{gold:300,food:300},m:'Yüz kişi... Bir zamanlar küçücük bir kafile olan halkın artık bir şehir kadar kalabalık.'},
+ {ch:'Final — Taç',t:'Krallığını ilan et: "Krallık" ünvanına yüksel.',ok:()=>S.rank>=4,m:'Taç giydin. Sürgünden krallığa uzanan yol tamamlandı! Hanedanın tarihe geçti.'}
 ];

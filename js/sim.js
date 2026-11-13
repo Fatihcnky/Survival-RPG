@@ -199,7 +199,7 @@ function checkStory(){
   if(s.r)for(const k in s.r)addRes(k,s.r[k]);
   S.story++;
   const last=S.story>=STORY.length;
-  showModal(last?'🏆 Zafer!':'📜 Görev tamamlandı',s.m+(s.r?'\nÖdül: '+costText(s.r):'')+(last?'\nOyunu istediğin kadar sürdürebilirsin.':'\n\nSıradaki: '+STORY[S.story].t),[{t:'Devam'}]);
+  showModal(last?'🏆 Zafer!':'📜 Görev tamamlandı',s.m+(s.r?'\nÖdül: '+costText(s.r):'')+(last?'\nOyunu istediğin kadar sürdürebilirsin.':'\n\n'+(STORY[S.story].ch?'📖 '+STORY[S.story].ch+'\n':'')+'Sıradaki: '+STORY[S.story].t),[{t:'Devam'}]);
   if(last)S.won=true;
  }
 }

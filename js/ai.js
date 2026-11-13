@@ -101,7 +101,7 @@ function kingsDay(){
   // savaş
   if(k.rel<-55&&k.pact!=='ittifak'&&!k.war&&S.day>14&&S.day-k.lastWar>10&&Math.random()<0.3&&dist<60){declareWar(i);return;}
   // hediye
-  if(k.rel>35&&Math.random()<0.15){
+  if(k.rel>35&&Math.random()<0.04){
    const g=ri(40,100);addRes('gold',g);log('🎁 '+kg.n+' '+g+' altın hediye gönderdi.');
   }
   // yardım isteği
@@ -140,7 +140,55 @@ const EVENTS=[
  {w:1.5,ok:()=>true,fn:()=>{
   showModal('🧙 Gezgin bilge','Bir bilge köyünüzde konakladı. Karşılığında yiyecek isteyip bilgi paylaşıyor.',[
    {t:'Ağırla (40 🍖)',fn:()=>{if(S.res.food>=40){S.res.food-=40;if(S.research)S.research.left=Math.max(1,S.research.left-25);else addRes('gold',50);log('🧙 Bilge size yardım etti.');}}},
-   {t:'Geç'}]);}}
+   {t:'Geç'}]);}} ,
+ {w:2,ok:()=>S.day>=14,fn:()=>{
+  const b=pickRandomBuilding();if(!b)return;
+  for(let i=0;i<4;i++){const x=clamp(b.x+ri(-14,14),2,MW-3),y=clamp(b.y+ri(-14,14),2,MH-3);if(walk(x,y))mkUnit('kurt','w',x+0.5,y+0.5,{st:'idle'});}
+  log('🐺 Kurt sürüsü köye yaklaşıyor! Avcılar ve köylüler dikkatli olsun.',b.x,b.y);}},
+ {w:2,ok:()=>S.day>=8,fn:()=>{
+  showModal('🎻 Gezgin ozan','Bir ozan köy meydanında şarkı söylemek istiyor. Ziyafet için 30 yiyecek ister.',[
+   {t:'Konaklat (30 🍖)',fn:()=>{if(S.res.food>=30){S.res.food-=30;S.happy=Math.min(100,S.happy+8);log('🎻 Ozan hanedanını öven bir şarkı yazdı. Halk neşelendi.');}}},
+   {t:'Geç'}]);}},
+ {w:1.5,ok:()=>S.age>=1,fn:()=>{
+  showModal('🙏 Hacılar','Uzak diyarlardan gelen hacılar köyünüzde duaya katılmak ve bağış toplamak istiyor.',[
+   {t:'Bağış ver (40 💰)',fn:()=>{if(S.res.gold>=40){S.res.gold-=40;S.happy=Math.min(100,S.happy+10);}}},
+   {t:'Geri çevir',fn:()=>{S.happy=Math.max(0,S.happy-3);}}]);}},
+ {w:1.5,ok:()=>seas()===1&&S.day>=14,fn:()=>{
+  const l=Math.floor(S.res.food*0.08);S.res.food-=l;S.drought=Math.max(S.drought,3);log('🦗 Çekirge istilası! Ekinler zarar gördü: -'+l+' yiyecek, 3 gün verim düştü.');}},
+ {w:1.5,ok:()=>S.day>=12&&S.res.food>=60,fn:()=>{
+  const k=ri(0,S.kings.length-1),K=KINGS[k];
+  showModal('🎩 Soylu misafir',K.who+'\'in akrabası köyünüze uğradı. Ziyafet verirsen komşuna iyi haber götürecek.',[
+   {t:'Ziyafet ver (60 🍖 20 💰)',fn:()=>{if(S.res.food>=60&&S.res.gold>=20){S.res.food-=60;S.res.gold-=20;adjRel(k,10*fxm('dip'));S.happy=Math.min(100,S.happy+4);}}},
+   {t:'Geç'}]);}},
+ {w:1.5,ok:()=>S.age>=1&&S.res.gold>=60&&S.res.iron>=20,fn:()=>{
+  showModal('⚒ Gezgin demirci','Bir demirci 3 hazır silah satıyor: 60 altın.',[
+   {t:'Satın al (60 💰)',fn:()=>{if(S.res.gold>=60){S.res.gold-=60;addRes('silah',3);}}},{t:'Geç'}]);}},
+ {w:1.5,ok:()=>S.day>=10,fn:()=>{
+  const n=2;
+  showModal('🧒 Yetimler','Savaştan kaçan '+n+' yetim köy kapısında bekliyor. Bakmak için 60 yiyecek gerekir.',[
+   {t:'Barındır',fn:()=>{if(popNow()+n<=popCap()&&S.res.food>=60){S.res.food-=60;const tc=mainTC();for(let i=0;i<n;i++){const p=spawnPos(tc);mkUnit('koylu','p',p.x,p.y);}S.happy=Math.min(100,S.happy+4);log('🧒 Yetimler köyde yeni bir yuva buldu.');}else log('⛔ Barınak veya yiyecek yetersiz.');}},
+   {t:'Reddet',fn:()=>{S.happy=Math.max(0,S.happy-4);}}]);}},
+ {w:1,ok:()=>S.day>=6,fn:()=>{
+  showModal('☄ Kuyruklu yıldız','Gökyüzünde parlak bir kuyruklu yıldız belirdi. Halk bunu bir alamet sayıyor.',[
+   {t:'Kutlama yap (40 🍖)',fn:()=>{if(S.res.food>=40){S.res.food-=40;S.happy=Math.min(100,S.happy+8);}}},
+   {t:'Önemseme',fn:()=>{S.happy=Math.max(0,S.happy-2);}}]);}},
+ {w:1.5,ok:()=>S.day>=18&&S.camps.some(c=>c.alive),fn:()=>{
+  showModal('👁 Haydut gözcüleri','Avcılar yakınlarda haydut gözcüleri gördü. Baskın hazırlığında olabilirler.',[
+   {t:'Tuzak kur (30 🌲)',fn:()=>{if(S.res.wood>=30){S.res.wood-=30;S.raidAt+=3;log('🪤 Tuzaklar kuruldu, baskın gecikebilir.');}}},
+   {t:'Yoksay'}]);}},
+ {w:1.5,ok:()=>S.day>=8,fn:()=>{
+  const t=['stone','iron'][ri(0,1)],n=ri(60,140);addRes(t,n);log('⛏ Madenciler zengin bir damar buldu: +'+n+' '+RN[t]+'.');}},
+ {w:1.5,ok:()=>countB('han',true)>0,fn:()=>{S.happy=Math.max(0,S.happy-5);log('🍺 Handa kavga çıktı, halk huzursuz.');}},
+ {w:2,ok:()=>S.dyn.heirs.length>0&&S.dyn.heirs.some(h=>h.age<16),fn:()=>{
+  const h=S.dyn.heirs.filter(x=>x.age<16)[0];
+  showModal('🤒 Varis hastalandı',h.name+' ağır bir ateşle yatıyor. Şifacı çağırmak 50 altına mal olur.',[
+   {t:'Şifacı çağır (50 💰)',fn:()=>{if(S.res.gold>=50){S.res.gold-=50;log('💊 '+h.name+' iyileşti.');}else if(Math.random()<0.5){S.dyn.heirs=S.dyn.heirs.filter(x=>x!==h);S.happy=Math.max(0,S.happy-10);log('⚰ '+h.name+' hayatını kaybetti.');}}},
+   {t:'Dua et',fn:()=>{if(Math.random()<0.4){S.dyn.heirs=S.dyn.heirs.filter(x=>x!==h);S.happy=Math.max(0,S.happy-10);log('⚰ '+h.name+' hayatını kaybetti. Hanedan yasta.');}else log('🙏 Dualar kabul oldu, '+h.name+' iyileşti.');}}]);}},
+ {w:1.5,ok:()=>S.dyn.spouse&&S.day>=20,fn:()=>{
+  showModal('🗡 Saray entrikası','Soylular arasında hanedana karşı fısıltılar dolaşıyor. Sorgulamak için 60 altın gerekir.',[
+   {t:'Soruştur (60 💰)',fn:()=>{if(S.res.gold>=60){S.res.gold-=60;S.happy=Math.min(100,S.happy+4);log('🔍 Komplo ortaya çıktı ve önlendi.');}}},
+   {t:'Görmezden gel',fn:()=>{S.happy=Math.max(0,S.happy-6);}}]);}}
+
 ];
 function rollEvent(){
  const list=EVENTS.filter(e=>e.ok());
