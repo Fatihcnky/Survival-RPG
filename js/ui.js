@@ -33,7 +33,7 @@ function buildBar(){
  let h='';
  if(!S.founded){h+=btn('🏛 Köyü Kur','found')+btn('👥 Hepsini Seç','selall');}
  else{
-  h+=btn('🔨 Yapı','tab','build')+btn('👥 Halk','tab','people')+btn('⚔ Ordu','tab','army')+btn('🔬 Araştır','tab','tech')+btn('📈 İlerleme','tab','prog')+btn('🕊 Diplomasi','tab','dip')+btn('💱 Pazar','tab','mkt')+btn('📜 Görev','tab','quest')+btn('🛣 Yol','road');
+  h+=btn('🔨 Yapı','tab','build')+btn('👥 Halk','tab','people')+btn('⚔ Ordu','tab','army')+btn('🔬 Araştır','tab','tech')+btn('📈 İlerleme','tab','prog')+btn('👑 Hanedan','tab','dyn')+btn('🕊 Diplomasi','tab','dip')+btn('💱 Pazar','tab','mkt')+btn('📜 Görev','tab','quest')+btn('🛣 Yol','road');
  }
  h+=btn('⏩ x'+S.speed,'speed')+btn('💾','save');
  $('bar').innerHTML=h;
@@ -81,7 +81,7 @@ function pPeople(){
  h+='<div class="row">'+btn('⚖ Otomatik dağıt','autojobs')+'<small>İş sırası: çiftçi → çoban → toplayıcı → oduncu → inşaatçı...</small></div>';
  JOBS.forEach(j=>{
   const cap=jobCap(j.id),want=S.jobs[j.id]||0,have=jobCount(j.id);
-  h+='<div class="row">'+j.ic+' <b style="width:110px;display:inline-block">'+j.n+'</b>'+btn('−','jm',j.id)+'<span style="min-width:44px;text-align:center">'+have+'/'+want+'</span>'+btn('+','jp',j.id)+'<small>'+(j.bt&&cap===0?'🔒 '+BT[j.bt].n+' gerekli':j.d+(j.bt?' (yuva: '+cap+')':''))+'</small></div>';
+  h+='<div class="row">'+j.ic+' <b style="width:110px;display:inline-block">'+j.n+'</b>'+btn('−','jm',j.id)+'<span style="min-width:44px;text-align:center">'+have+'/'+want+'</span>'+btn('+','jp',j.id)+'<small>'+(j.bt&&cap===0?'🔒 '+BT[j.bt].n+' gerekli':j.d+(j.bt?' · yuva: '+cap+' ('+countB(j.bt,true)+' bina)':''))+'</small></div>';
  });
  return h;
 }
@@ -127,6 +127,7 @@ function pDip(){
   const s=S.kings[i];
   h+='<div style="margin:6px 0;padding:6px;border:1px solid '+k.col+';border-radius:8px"><b>'+k.n+'</b> — '+k.who+'<br><small>'+k.d+'</small><br>İlişki: '+Math.round(s.rel)+' '+bar((s.rel+100)/200)+' · Durum: '+(s.war?'⚔ SAVAŞ':s.pact==='ittifak'?'🤝 İttifak':s.pact?'📜 Ticaret':'—')+'<div class="row">';
   h+=btn('🎁 Hediye (50💰)','gift',i,S.res.gold<50);
+  if(!S.dyn.spouse&&!s.war)h+=btn('💍 Evlilik (150💰)','marry',i,s.rel<30||S.res.gold<150);
   if(s.war)h+=btn('🕊 Barış ('+peaceCost(i)+'💰)','peace',i,S.res.gold<peaceCost(i));
   else if(!s.pact)h+=btn('📜 Ticaret (100💰)','treaty',i,s.rel<15||S.res.gold<100);
   else if(s.pact==='ticaret')h+=btn('🤝 İttifak (200💰 150🍖)','ally',i,s.rel<45||S.res.gold<200||S.res.food<150);
@@ -140,6 +141,20 @@ function pMkt(){
  ['food','wood','stone','iron'].forEach(k=>{
   h+='<div class="row"><b style="width:90px;display:inline-block">'+RI[k]+' '+RN[k]+'</b>'+btn('Sat 50','sell',k,S.res[k]<50)+btn('Al 50','buy',k,S.res.gold<Math.ceil(buyPrice(k)*50))+'<small>Sat: '+sellPrice(k).toFixed(2)+'💰 · Al: '+buyPrice(k).toFixed(2)+'💰 (birim)</small></div>';
  });
+ return h;
+}
+function pDyn(){
+ const D=S.dyn,r=D.ruler;
+ let h='<h4>👑 Hane '+D.house+'</h4>';
+ h+='<div><b>'+rulerTitle()+' '+r.name+'</b> ('+r.age+') — '+TRAITS[r.trait].n+'<br><small>'+TRAITS[r.trait].d+'</small></div>';
+ h+=D.spouse?'<div style="margin-top:4px">💍 Eş: <b>'+D.spouse.name+'</b> ('+D.spouse.age+') — '+KINGS[D.spouse.from].n+'</div>':'<div style="margin-top:4px"><small>💍 Evli değilsin. Komşu hanedanlarla ilişkiyi artır, evlilik teklifi gelebilir ya da Diplomasi\'den teklif et.</small></div>';
+ h+='<div style="margin-top:4px">👶 Varisler: '+(D.heirs.length?D.heirs.map(x=>x.name+' ('+x.age+', '+TRAITS[x.trait].n+')').join(' · '):'<small>yok</small>')+'</div>';
+ if(D.crisis>0)h+='<div style="color:#ff8a80">⚠ Hanedan krizi sürüyor.</div>';
+ const hp=Math.round(S.happy);
+ h+='<h4>🙂 Halk mutluluğu: '+hp+' '+bar(hp/100)+'</h4><small>'+(hp>=65?'Göçmenler gelir, verim yüksek.':hp<20?'Halk isyana yakın!':'Verim: x'+happyMul().toFixed(2))+'</small>';
+ h+='<div style="font-size:12px;margin:3px 0">'+happyFactors().map(x=>'<span style="color:'+(x[1]>=0?'#9be59b':'#ff9a9a')+';margin-right:8px;white-space:nowrap">'+x[0]+' '+(x[1]>0?'+':'')+x[1]+'</span>').join('')+'</div>';
+ h+='<div class="row">'+btn('💰 Vergi: '+TAXN[S.taxRate],'tax')+'<small>Düşük: mutluluk +8, gelir x0.5 · Yüksek: mutluluk -12, gelir x1.8</small></div>';
+ h+='<div class="row">'+btn('🎉 Şenlik (80🍖 30💰)','fest',null,D.festCool>0||S.res.food<80||S.res.gold<30)+'<small>'+(D.festCool>0?'Bekleme: '+D.festCool+' gün':'6 gün mutluluk +15')+'</small></div>';
  return h;
 }
 function pQuest(){
@@ -164,7 +179,7 @@ function updPanel(force){
  const p=$('panel');
  let h='';
  if(UI.sel&&UI.sel.kind==='b')h=pSel();
- else if(UI.tab)h={build:pBuild,people:pPeople,army:pArmy,tech:pTech,prog:pProg,dip:pDip,mkt:pMkt,quest:pQuest}[UI.tab]();
+ else if(UI.tab)h={build:pBuild,people:pPeople,army:pArmy,tech:pTech,prog:pProg,dip:pDip,mkt:pMkt,quest:pQuest,dyn:pDyn}[UI.tab]();
  if(!h){p.style.display='none';UI.lastPanel='';return;}
  h='<div style="text-align:right">'+btn('✖ Kapat','closep')+'</div>'+h;
  if(h!==UI.lastPanel||force){p.innerHTML=h;UI.lastPanel=h;}
@@ -175,7 +190,7 @@ function updHud(){
  let h='';
  if(S.founded)RES.forEach(k=>{h+='<span>'+RI[k]+Math.floor(S.res[k])+(k==='silah'?'':'/'+cap)+'</span>';});
  else h+='<span>🍖'+Math.floor(S.res.food)+'</span><span>🌲'+Math.floor(S.res.wood)+'</span><span>🧱'+Math.floor(S.res.stone)+'</span><span>💰'+Math.floor(S.res.gold)+'</span>';
- h+='<br><span>👥 '+popNow()+'/'+popCap()+'</span><span>📅 '+dayText()+'</span><span>'+AGES[S.age]+' · '+RANKS[S.rank]+'</span>';
+ h+='<br><span>👥 '+popNow()+'/'+popCap()+'</span><span>🙂'+Math.round(S.happy)+'</span><span>📅 '+dayText()+'</span><span>'+AGES[S.age]+' · '+RANKS[S.rank]+'</span>';
  if(S.epi)h+='<span>🤒</span>';
  if(S.drought>0)h+='<span>☀</span>';
  if(S.starve>0)h+='<span style="color:#ff8a80">☠ AÇLIK</span>';
@@ -219,6 +234,9 @@ function act(a,v,w,el){
   case 'peace':peaceK(+v);break;
   case 'sell':sellRes(v,50);break;
   case 'buy':buyRes(v,50);break;
+  case 'tax':setTax();break;
+  case 'fest':holdFestival();break;
+  case 'marry':proposeMarriage(+v);break;
   case 'selarmy':UI.sel={kind:'u',ids:soldiers().map(u=>u.id)};UI.tab=null;updPanel(true);break;
   case 'retreat':{const tc=mainTC();if(tc)cmdMove(soldiers(),tc.x+tc.w/2,tc.y+tc.h+1,false);break;}
   case 'demolish':{const b=BM.get(+v);if(b){demolish(b);UI.sel=null;}updPanel(true);break;}

@@ -15,7 +15,7 @@ function launchRaid(){
  if(!camps.length||!tc)return;
  camps.sort((a,b)=>Math.hypot(a.x-tc.x,a.y-tc.y)-Math.hypot(b.x-tc.x,b.y-tc.y));
  const c=camps[Math.floor(Math.random()*Math.min(3,camps.length))];
- const size=clamp(2+Math.floor(S.day/6)+Math.floor(popNow()/14)+S.rank,3,30);
+ const size=clamp(2+Math.floor(S.day/8)+Math.floor(popNow()/14)+S.rank,3,30);
  for(let i=0;i<size;i++){
   let t='haydut';
   const r=Math.random();
@@ -32,7 +32,7 @@ function launchRaid(){
    log('🤝 '+KINGS[i].n+' yardım birliği gönderdi ('+n+' asker).',p.x,p.y);
   }
  });
- const ev=S.day<12?7:S.day<30?6:5;
+ const ev=S.day<40?10:S.day<80?8:6;
  S.raidAt=S.day+ri(ev,ev+3);
 }
 function tributeDemand(){
@@ -131,11 +131,11 @@ const EVENTS=[
  {w:2,ok:()=>seas()===1||seas()===2,fn:()=>{const f=ri(60,150);addRes('food',f);log('🌾 Bereketli hasat! +'+f+' yiyecek.');}},
  {w:1,ok:()=>true,fn:()=>{const g=ri(40,120);addRes('gold',g);log('💎 Çocuklar eski bir define buldu: +'+g+' altın.');}},
  {w:2,ok:()=>true,fn:()=>{const f=ri(50,110);addRes('food',f);log('🦌 Avcılar bol av getirdi: +'+f+' yiyecek.');}},
- {w:2,ok:()=>S.res.wood>60,fn:()=>{const l=Math.floor(S.res.wood*0.15);S.res.wood-=l;log('⛈ Fırtına odun deposunu vurdu: -'+l+' odun.');}},
- {w:2,ok:()=>S.res.food>80,fn:()=>{const l=Math.floor(S.res.food*0.12);S.res.food-=l;log('🐀 Fareler ambara girdi: -'+l+' yiyecek.');}},
- {w:1.5,ok:()=>S.res.gold>80,fn:()=>{const l=Math.min(S.res.gold,ri(50,130));S.res.gold-=l;log('🥷 Hırsızlar hazineden '+l+' altın çaldı!');}},
- {w:1.5,ok:()=>seas()===1&&countB('ciftlik',true)>0,fn:()=>{S.drought=3;log('☀ Kuraklık! 3 gün boyunca çiftlik verimi yarıya düşer.');}},
- {w:2,ok:()=>S.day>=6&&!S.epi&&popNow()>10,fn:()=>{S.epi={left:3,sev:1+Math.random()*0.5};showModal('🤒 Salgın!','Köyde hastalık yayılıyor. Hastane ve şifacılar kayıpları azaltır.',[{t:'Anladım'}]);}},
+ {w:2,ok:()=>S.day>=12&&S.res.wood>60,fn:()=>{const l=Math.floor(S.res.wood*0.15);S.res.wood-=l;log('⛈ Fırtına odun deposunu vurdu: -'+l+' odun.');}},
+ {w:2,ok:()=>S.day>=12&&S.res.food>80,fn:()=>{const l=Math.floor(S.res.food*0.12);S.res.food-=l;log('🐀 Fareler ambara girdi: -'+l+' yiyecek.');}},
+ {w:1.5,ok:()=>S.day>=14&&S.res.gold>80,fn:()=>{const l=Math.min(S.res.gold,ri(50,130));S.res.gold-=l;log('🥷 Hırsızlar hazineden '+l+' altın çaldı!');}},
+ {w:1.5,ok:()=>S.day>=14&&seas()===1&&countB('ciftlik',true)>0,fn:()=>{S.drought=3;log('☀ Kuraklık! 3 gün boyunca çiftlik verimi yarıya düşer.');}},
+ {w:2,ok:()=>S.day>=16&&!S.epi&&popNow()>12,fn:()=>{S.epi={left:3,sev:1+Math.random()*0.5};showModal('🤒 Salgın!','Köyde hastalık yayılıyor. Hastane ve şifacılar kayıpları azaltır.',[{t:'Anladım'}]);}},
  {w:2,ok:()=>S.age>=1&&S.blds.filter(b=>b.team==='p'&&b.done).length>3,fn:()=>{const b=pickRandomBuilding();if(b)startFire(b);}},
  {w:1.5,ok:()=>true,fn:()=>{
   showModal('🧙 Gezgin bilge','Bir bilge köyünüzde konakladı. Karşılığında yiyecek isteyip bilgi paylaşıyor.',[
@@ -153,9 +153,14 @@ function onDay(){
  const d=S.day,s=seas(),sd=d%SEASON_DAYS;
  if(sd===0)log('🌤 Mevsim: '+SEASONS[s]+'.');
  if(s===2&&sd===SEASON_DAYS-1)log('❄ Kış yaklaşıyor! Odun ve yiyecek biriktir.');
+ // mutluluk, hanedan, kış
+ happyDay();
+ if(d>0&&d%(SEASON_DAYS*4)===0)dynYear();
+ if(s===0&&sd===0)S.hardWinter=false;
+ if(s===2&&sd===SEASON_DAYS-1&&Math.random()<0.25){S.hardWinter=true;log('🌨 Yaşlılar sert bir kış geleceğini söylüyor: odun tüketimi artacak!');}
  // vergi & ticaret
  const pop=popNow();
- const tax=Math.floor(pop*0.1*(1+0.6*S.rank)*fxm('tax'));
+ const tax=Math.floor(pop*0.1*(1+0.6*S.rank)*fxm('tax')*TAXG[S.taxRate]);
  if(tax>0)addRes('gold',tax);
  S.kings.forEach((k,i)=>{
   if(k.pact==='ticaret'){addRes('gold',Math.round(6*(1+k.rel/100)*fxm('trade')));if(d%3===0)addRes(['wood','stone','iron'][d%3?0:ri(0,2)],ri(10,25));}
@@ -183,8 +188,9 @@ function onDay(){
  if(d>=S.raidAt-1&&d<S.raidAt&&S.camps.some(c=>c.alive)&&Math.random()<0.5&&d>=7)tributeDemand();
  if(d>=S.raidAt)launchRaid();
  if(d%10===0&&S.camps.filter(c=>c.alive).length<4){makeCamps(S.camps.filter(c=>c.alive).length+1);}
+ wildDay();
  // krallar & olaylar
  kingsDay();
- if(d>=S.nextEvent){rollEvent();S.nextEvent=d+ri(2,3);}
+ if(d>=S.nextEvent){rollEvent();S.nextEvent=d+ri(3,5);}
  if(d%3===0)saveGame();
 }

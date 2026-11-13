@@ -2,9 +2,9 @@
 // ===== BİRİMLER: köylü işleri, savaş, bina güncellemesi =====
 const JOBRES={wood:[2,'wood'],stone:[3,'stone'],iron:[4,'iron'],gold:[5,'gold'],forage:[6,'food']};
 const JOBBT={};JOBS.forEach(j=>{if(j.bt)JOBBT[j.id]=j.bt;});
-const FARMS=[1.0,1.4,1.2,0.05],HERDS=[0.8,1,1,0.6],FORAGES=[1,1.2,1.6,0.15];
+const FARMS=[1.0,1.4,1.2,0.25],HERDS=[0.8,1,1,0.6],FORAGES=[1,1.2,1.6,0.15];
 
-function storeCap(){return 300+300*countB('depo',true)+fxa('store');}
+function storeCap(){return 400+400*countB('depo',true)+fxa('store');}
 function addRes(k,n){const c=storeCap();S.res[k]=Math.min(c,(S.res[k]||0)+n);}
 function afford(c){for(const k in c)if((S.res[k]||0)<c[k])return false;return true;}
 function pay(c){for(const k in c)S.res[k]-=c[k];}
@@ -14,8 +14,8 @@ function popCap(){let n=0;for(const b of S.blds)if(b.team==='p'&&b.done)n+=BT[b.
 
 // ---------- köylü ----------
 function gatherRate(j){
- if(j==='forage')return 0.9*fxm('forage')*FORAGES[seas()];
- return 0.9*fxm('gather')*(seas()===3?0.8:1);
+ if(j==='forage')return 0.9*fxm('forage')*FORAGES[seas()]*happyMul();
+ return 0.9*fxm('gather')*(seas()===3?0.8:1)*happyMul();
 }
 function findRes(j,x,y){
  const ty=JOBRES[j][0];let best=-1,bd=1e9;
@@ -69,6 +69,12 @@ function startJob(u){
   u.st='toWork';
  }
 }
+function findPrey(b){
+ let best=null,bd=2025;
+ const cx=b.x+b.w/2,cy=b.y+b.h/2;
+ for(const q of S.units){if(q.dead||q.team!=='w'||!UT[q.t].food)continue;const d=(q.x-cx)**2+(q.y-cy)**2;if(d<bd){bd=d;best=q;}}
+ return best;
+}
 function findFire(st){
  let best=null,bd=900;
  for(const b of S.blds){if(b.team!=='p'||b.fire<=0)continue;const d=dEnt(st,b)**2;if(d<bd){bd=d;best=b;}}
@@ -78,10 +84,12 @@ function workTick(u,dt){
  const b=BM.get(u.wb);
  if(!b||!b.done||b.hp<=0){u.st='idle';u.wb=0;return;}
  const j=u.job,s=seas();
- if(j==='farm')addRes('food',0.10*dt*FARMS[s]*fxm('farm')*(S.drought>0?0.5:1));
- else if(j==='herd')addRes('food',0.065*dt*HERDS[s]);
- else if(j==='trade')addRes('gold',0.07*dt*fxm('trade')*(1+0.25*pactCount()));
+ const hm=happyMul();
+ if(j==='farm')addRes('food',0.10*dt*FARMS[s]*fxm('farm')*(S.drought>0?0.5:1)*hm);
+ else if(j==='herd')addRes('food',0.065*dt*HERDS[s]*hm);
+ else if(j==='trade')addRes('gold',0.07*dt*fxm('trade')*(1+0.25*pactCount())*hm);
  else if(j==='smith'){u.tm+=dt;if(u.tm>=12){if(S.res.iron>=2&&S.res.wood>=2){S.res.iron-=2;S.res.wood-=2;addRes('silah',1);u.tm=0;}else u.tm=11;}}
+ else if(j==='hunt'){u.fs-=dt;if(u.fs<=0){u.fs=2;const pr=findPrey(b);if(pr){u.pr=pr.id;u.st='hunt';u.path=null;u.cd=0;u.rp=0;}}}
  else if(j==='fire'){
   u.fs-=dt;
   if(u.fs<=0){u.fs=1;const f=findFire(b);if(f&&setPath(u,f.x,f.y,f.w,f.h,1,false)===1){u.ft=f.id;u.st='toFire';}}
@@ -113,7 +121,7 @@ function updVillager(u,dt){
    if(u.carry>=9.99||RA[i]<=0){if(u.carry>0.5)toDrop(u);else u.st='idle';}
    break;}
   case 'toDrop':
-   if(walkTo(u,dt)){const rk=JOBRES[u.job]&&JOBRES[u.job][1];if(u.carry>0&&rk)addRes(rk,u.carry);u.carry=0;u.st='idle';}
+   if(walkTo(u,dt)){const rk=u.job==='hunt'?'food':(JOBRES[u.job]&&JOBRES[u.job][1]);if(u.carry>0&&rk)addRes(rk,u.carry);if(u.job==='hunt')S.stats.hunted=(S.stats.hunted||0)+1;u.carry=0;u.st='idle';}
    break;
   case 'toWork':if(walkTo(u,dt))u.st='work';break;
   case 'work':workTick(u,dt);break;
@@ -127,6 +135,24 @@ function updVillager(u,dt){
     if(b.prog>=1)finishB(b);
    }else if(b.hp<b.mhp)b.hp=Math.min(b.mhp,b.hp+8*dt);
    else{u.st='idle';u.sb=0;}
+   break;}
+  case 'hunt':{
+   const pr=UM.get(u.pr);
+   if(!pr||pr.dead){u.st='idle';u.pr=0;break;}
+   const dist=Math.hypot(pr.x-u.x,pr.y-u.y);
+   if(dist<=6.5){
+    u.path=null;u.cd-=dt;
+    if(u.cd<=0){
+     u.cd=1.3;
+     FX.push({k:'arrow',x1:u.x,y1:u.y,x2:pr.x,y2:pr.y,t:0.25,T:0.25});
+     damage(pr,12,u);
+     if(pr.dead){u.carry=UT[pr.t].food;u.pr=0;toDrop(u);}
+    }
+   }else{
+    u.rp-=dt;
+    if(!u.path||u.rp<=0){u.rp=1.2;if(setPath(u,Math.floor(pr.x),Math.floor(pr.y),1,1,4,true)===0){u.st='idle';u.wait=2;break;}}
+    if(u.path)walkTo(u,dt);
+   }
    break;}
   case 'toFire':if(walkTo(u,dt))u.st='fire';break;
   case 'fire':{
@@ -162,7 +188,7 @@ function killU(u,a){
  u.hp=0;u.dead=1;UM.delete(u.id);
  FX.push({k:'skull',x:u.x,y:u.y,t:1,T:1});
  if(u.team==='b'||u.team==='k')S.stats.kills++;
- if(u.team==='p'){S.stats.lost++;if(S.t-lastLogLoss>3){lastLogLoss=S.t;log('💀 '+UT[u.t].n+' öldü.',u.x,u.y);}}
+ if(u.team==='p'){S.stats.lost++;S.recentLoss=(S.recentLoss||0)+1;if(S.t-lastLogLoss>3){lastLogLoss=S.t;log('💀 '+UT[u.t].n+' öldü.',u.x,u.y);}}
 }
 function destroyB(b,a){
  if(b.hp>0&&b.hp!==0)b.hp=0;
@@ -214,7 +240,7 @@ function hit(a,e){
  damage(e,dm,a);
  if(a.team==='b'&&e.w&&e.team==='p'&&Math.random()<0.008)startFire(e);
 }
-function sightOf(u){const d=UT[u.t];return u.guard?8:Math.max(6.5,d.rng+2);}
+function sightOf(u){const d=UT[u.t];if(d.aggr){const td=(S.t%DAY)/DAY;return(td>0.78||td<0.06||seas()===3)?11:7;}return u.guard?8:Math.max(6.5,d.rng+2);}
 function updFighter(u,dt){
  const d=UT[u.t];
  if(u.wait>0)u.wait-=dt;
@@ -275,8 +301,32 @@ function updFighter(u,dt){
   if(u.st==='move'||u.st==='amove'||u.st==='return')u.st='idle';
  }
 }
+function wander(u,dt){
+ if(u.path)return;
+ u.wait-=dt;
+ if(u.wait>0)return;
+ u.wait=3+Math.random()*7;
+ const gx=clamp(Math.floor(u.x+(Math.random()*12-6)),1,MW-2),gy=clamp(Math.floor(u.y+(Math.random()*12-6)),1,MH-2);
+ if(walk(gx,gy))setPath(u,gx,gy,1,1,0,true);
+}
+function updAnimal(u,dt){
+ if(u.t==='geyik'){
+  u.scan-=dt;
+  if(u.scan<=0){
+   u.scan=0.5;
+   let o=null,bd=u.hp<UT.geyik.hp?64:20;
+   for(const q of S.units){if(q.dead||q.team==='w'||q.team==='k')continue;const dd=(q.x-u.x)**2+(q.y-u.y)**2;if(dd<bd){bd=dd;o=q;}}
+   if(o){const dx=u.x-o.x,dy=u.y-o.y,l=Math.hypot(dx,dy)||1;setPath(u,clamp(Math.floor(u.x+dx/l*8),1,MW-2),clamp(Math.floor(u.y+dy/l*8),1,MH-2),1,1,0,true);}
+  }
+  if(u.path)walkTo(u,dt);else wander(u,dt);
+  return;
+ }
+ updFighter(u,dt);
+ if(!u.tg&&!u.path&&u.st==='idle')wander(u,dt);
+}
 function updUnit(u,dt){
  if(u.dead)return;
+ if(u.team==='w'){updAnimal(u,dt);return;}
  if(u.team==='p'&&u.t==='koylu'){updVillager(u,dt);return;}
  updFighter(u,dt);
 }

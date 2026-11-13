@@ -73,6 +73,7 @@ function drawBuilding(b){
   ctx.drawImage(bi,b.x+0.02,b.y+0.02,b.w-0.04,b.h-0.04);
   ctx.globalAlpha=1;
   if(b.team==='p'||b.team==='b'){ctx.fillStyle=b.team==='p'?TEAMCOL.p:TEAMCOL.b;ctx.fillRect(b.x+0.05,b.y+0.05,0.28,0.28);}
+  if(b.team==='p'&&b.w>=2&&d.ic&&b.t!=='ev')ctx.drawImage(spr(d.ic),b.x+b.w-0.55,b.y+0.02,0.5,0.5);
  }else{
   ctx.fillStyle=d.col;ctx.globalAlpha=b.done?1:0.55;
   ctx.fillRect(b.x+0.06,b.y+0.06,b.w-0.12,b.h-0.12);
@@ -93,6 +94,8 @@ function drawUnit(u){
  if(us){
   ctx.drawImage(us,u.x-0.6,u.y-0.78,1.2,1.2);
   if(BADGE[u.t])ctx.drawImage(spr(BADGE[u.t]),u.x+0.1,u.y-0.1,0.42,0.42);
+ }else if(u.team==='w'){
+  ctx.drawImage(spr(d.g),u.x-0.4,u.y-0.5,0.8,0.8);
  }else{
   const r=u.t==='top'?0.4:0.3;
   ctx.fillStyle=u.team==='p'&&u.t==='koylu'?'#e8d3a8':TEAMCOL[u.team];
@@ -149,7 +152,7 @@ function draw(){
  if(sn===3){ctx.fillStyle='rgba(200,220,255,0.07)';ctx.fillRect(0,0,CW,CH);}
 }
 // ---- mini harita ----
-const mmBase=document.createElement('canvas');mmBase.width=MW;mmBase.height=MH;
+const mmBase=document.createElement('canvas');mmBase.width=MW;mmBase.height=MH;mmc.width=mmc.height=120;
 let mmT=-99;
 function drawMini(force){
  if(force||S.t-mmT>4){
@@ -158,9 +161,9 @@ function drawMini(force){
   for(let i=0;i<NN;i++){const c=C[T[i]]||C[0];im.data[i*4]=c[0];im.data[i*4+1]=c[1];im.data[i*4+2]=c[2];im.data[i*4+3]=255;}
   x.putImageData(im,0,0);
  }
- mctx.imageSmoothingEnabled=false;mctx.drawImage(mmBase,0,0,96,96);
- for(const b of S.blds){mctx.fillStyle=b.team==='p'?'#4da3ff':b.team==='b'?'#ff3b3b':'#ddd';mctx.fillRect(b.x,b.y,b.w,b.h);}
- for(const u of S.units){if(u.team==='p')continue;mctx.fillStyle=TEAMCOL[u.team];mctx.fillRect(u.x-1,u.y-1,2,2);}
+ const K=mmc.width/MW;mctx.imageSmoothingEnabled=false;mctx.drawImage(mmBase,0,0,mmc.width,mmc.height);
+ for(const b of S.blds){mctx.fillStyle=b.team==='p'?'#4da3ff':b.team==='b'?'#ff3b3b':'#ddd';mctx.fillRect(b.x*K,b.y*K,Math.max(2,b.w*K),Math.max(2,b.h*K));}
+ for(const u of S.units){if(u.team==='p'||(u.team==='w'&&u.t!=='kurt'))continue;mctx.fillStyle=TEAMCOL[u.team];mctx.fillRect(u.x*K-1,u.y*K-1,2,2);}
  const s=sc(),vw=CW/s,vh=CH/s;
- mctx.strokeStyle='#fff';mctx.lineWidth=1;mctx.strokeRect(S.cam.x-vw/2,S.cam.y-vh/2,vw,vh);
+ mctx.strokeStyle='#fff';mctx.lineWidth=1;mctx.strokeRect((S.cam.x-vw/2)*K,(S.cam.y-vh/2)*K,vw*K,vh*K);
 }

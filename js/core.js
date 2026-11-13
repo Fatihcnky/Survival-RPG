@@ -34,12 +34,13 @@ function dEnt(u,e){
 }
 function seas(){return Math.floor(S.t/DAY/SEASON_DAYS)%4;}
 function curDay(){return Math.floor(S.t/DAY);}
-function fxm(k){let m=1;for(const id in S.techs){const f=TECH[id].fx;if(f&&f[k])m*=f[k];}return m;}
+function fxm(k){let m=1;for(const id in S.techs){const f=TECH[id].fx;if(f&&f[k])m*=f[k];}if(typeof fxTrait==='function'&&S.dyn)m*=fxTrait(k);return m;}
 function fxa(k){let m=0;for(const id in S.techs){const f=TECH[id].add;if(f&&f[k])m+=f[k];}return m;}
 function countB(t,done){let n=0;for(const b of S.blds)if(b.team==='p'&&b.t===t&&(!done||b.done))n++;return n;}
 function nearestB(u,fn){let best=null,bd=1e9;for(const b of S.blds){if(b.hp<=0||!fn(b))continue;const d=dEnt(u,b);if(d<bd){bd=d;best=b;}}return best;}
 function hostile(a,b){
  const x=a.team,y=b.team;
+ if(x==='w'||y==='w'){const w=x==='w'?a:b,o=x==='w'?b:a;return !!(UT[w.t]&&UT[w.t].aggr)&&!o.w&&(o.team==='p'||o.team==='a');}
  if(x===y||x==='n'||y==='n')return false;
  const f=t=>t==='p'||t==='a';
  if(f(x)&&f(y))return false;
@@ -98,7 +99,7 @@ function findPath(sx,sy,gx,gy,gw,gh,ex,partial){
   const px=cur%MW,py=(cur/MW)|0;
   if(inGoal(px,py)){found=cur;break;}
   const hh=h(px,py);if(hh<bh){bh=hh;best=cur;}
-  if(++iter>6000)break;
+  if(++iter>14000)break;
   for(let d=0;d<8;d++){
    const dx=DX[d],dy=DY[d],nx=px+dx,ny=py+dy;
    if(!walk(nx,ny))continue;
@@ -162,7 +163,7 @@ function genMap(){
  // başlangıca yakın garantili kümeler
  [[3,0.4],[4,2.2],[5,3.6],[6,5.2],[6,1.2]].forEach(([t,a],k)=>{const d=9+k*1.3;cluster(t,Math.round(st.x+Math.cos(a)*d),Math.round(st.y+Math.sin(a)*d),t===6?5:7,AM[t]);});
  // rastgele kümeler
- [[3,7],[4,5],[5,4],[6,8]].forEach(([t,n])=>{for(let k=0;k<n;k++){const x=ri(4,MW-5),y=ri(4,MH-5);if(Math.hypot(x-st.x,y-st.y)<9)continue;cluster(t,x,y,t===6?5:6,AM[t]);}});
+ [[3,22],[4,16],[5,12],[6,26]].forEach(([t,n])=>{for(let k=0;k<n;k++){const x=ri(4,MW-5),y=ri(4,MH-5);if(Math.hypot(x-st.x,y-st.y)<9)continue;cluster(t,x,y,t===6?5:6,AM[t]);}});
  // ulaşılabilirlik: başlangıçtan erişilemeyen kara su olsun
  const seen=new Uint8Array(NN),q=[st.y*MW+st.x];seen[q[0]]=1;
  for(let h=0;h<q.length;h++){const c=q[h],x=c%MW,y=(c/MW)|0;for(let d=0;d<4;d++){const nx=x+DX[d],ny=y+DY[d];if(!inMap(nx,ny))continue;const ni=ny*MW+nx;if(seen[ni]||T[ni]===1||(T[ni]>=3&&T[ni]<=5))continue;seen[ni]=1;q.push(ni);}}

@@ -10,7 +10,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#111;font-family:syste
 #c{position:absolute;inset:0;width:100%;height:100%;display:block}
 #top{position:absolute;top:0;left:0;right:0;padding:4px 8px;background:rgba(0,0,0,.68);font-size:13px;line-height:1.55;pointer-events:none}
 #top span{margin-right:10px;white-space:nowrap}
-#mm{position:absolute;right:6px;top:52px;border:2px solid #000b;width:96px;height:96px;background:#000;image-rendering:pixelated}
+#mm{position:absolute;right:6px;top:52px;border:2px solid #000b;width:110px;height:110px;background:#000;image-rendering:pixelated}
 #log{position:absolute;left:6px;top:52px;max-width:58%;font-size:12px;pointer-events:none}
 #log div{pointer-events:auto;background:rgba(0,0,0,.65);padding:3px 8px;margin-bottom:3px;border-radius:6px;animation:f 10s forwards}
 @keyframes f{0%,85%{opacity:1}100%{opacity:0}}
@@ -37,7 +37,7 @@ button.dis{opacity:.4}
 <body>
 <canvas id="c"></canvas>
 <div id="top"></div>
-<canvas id="mm" width="96" height="96"></canvas>
+<canvas id="mm" width="120" height="120"></canvas>
 <div id="log"></div>
 <div id="hint"><span id="hinttxt"></span><span id="hintbtn"></span></div>
 <div id="selinfo"></div>
@@ -49,6 +49,7 @@ button.dis{opacity:.4}
 <script src="js/units.js"></script>
 <script src="js/sim.js"></script>
 <script src="js/ai.js"></script>
+<script src="js/dynasty.js"></script>
 <script src="js/render.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/input.js"></script>

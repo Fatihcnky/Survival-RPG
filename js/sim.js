@@ -7,21 +7,44 @@ function newGame(seed){
   jobs:{build:1,wood:3,forage:2},story:0,nid:1,units:[],blds:[],camps:[],
   techs:{},research:null,ageProg:null,stats:{camps:0,kills:0,raids:0,lost:0},
   kings:KINGS.map(k=>({rel:{bilge:10,savasci:-10,acgozlu:0,dost:25}[k.pers],str:20,pact:null,war:false,cool:0,lastComplaint:-99,lastWar:-99})),
-  mkt:{food:1,wood:1,stone:1,iron:1},raidAt:10,nextEvent:2,epi:null,drought:0,starve:0,cold:0,
-  start:{x:48,y:52},cam:{x:48,y:52,z:1},day:0,rally:null,done:false,won:false};
+  mkt:{food:1,wood:1,stone:1,iron:1},raidAt:22,nextEvent:5,epi:null,drought:0,starve:0,cold:0,
+  start:{x:80,y:88},cam:{x:80,y:88,z:1},day:0,rally:null,done:false,won:false};
  UM=new Map();BM=new Map();
+ newDynasty();
  genMap();
  // krallıklar (dekor)
  KINGS.forEach((k,i)=>{
   mkB('ktc','n',k.x-2,k.y-2,true,{kid:i});
   [[-6,-1],[5,-3],[-5,5],[4,5],[-1,-7],[2,6]].forEach(([dx,dy])=>{const x=k.x+dx,y=k.y+dy;if(walkRect(x,y,2,2))mkB('khouse','n',x,y,true,{kid:i});});
  });
- makeCamps(7);
+ makeCamps(12);spawnWildlife();
  // başlangıç kafilesi
  const st=S.start;
  for(let i=0;i<6;i++)mkUnit('koylu','p',st.x+0.5+(i%3)*0.8-0.8,st.y+0.5+(i/3|0)*0.8);
  for(let i=0;i<3;i++)mkUnit('mizrakli','p',st.x+0.5+i*0.8-0.8,st.y+2);
  return S;
+}
+function spawnWild(t,minD){
+ for(let k=0;k<60;k++){
+  const x=ri(3,MW-4),y=ri(3,MH-4),i=y*MW+x;
+  if(!SEEN[i]||T[i]===1||(T[i]>=3&&T[i]<=5)||OCC[i])continue;
+  if(Math.hypot(x-S.start.x,y-S.start.y)<minD)continue;
+  if(S.founded&&S.blds.some(b=>b.team==='p'&&Math.hypot(b.x-x,b.y-y)<minD))continue;
+  mkUnit(t,'w',x+0.5,y+0.5,{st:'idle'});return true;
+ }
+ return false;
+}
+function spawnWildlife(){
+ for(let i=0;i<70;i++)spawnWild('geyik',26);
+ for(let i=0;i<28;i++)spawnWild('domuz',30);
+ for(let i=0;i<14;i++)spawnWild('kurt',45);
+}
+function wildDay(){
+ const c={geyik:0,domuz:0,kurt:0};
+ for(const u of S.units)if(u.team==='w'&&!u.dead)c[u.t]++;
+ if(c.geyik<55&&Math.random()<0.5)spawnWild('geyik',25);
+ if(c.domuz<22&&Math.random()<0.3)spawnWild('domuz',28);
+ if(c.kurt<12&&Math.random()<0.12)spawnWild('kurt',40);
 }
 function walkRect(x,y,w,h){for(let dy=0;dy<h;dy++)for(let dx=0;dx<w;dx++){const X=x+dx,Y=y+dy;if(!inMap(X,Y))return false;const i=Y*MW+X;if(T[i]!==0||OCC[i]!==0)return false;}return true;}
 function makeCamps(n){
@@ -29,17 +52,17 @@ function makeCamps(n){
  while(S.camps.filter(c=>c.alive).length<n&&tries++<400){
   const x=ri(5,MW-8),y=ri(5,MH-8);
   if(!SEEN[y*MW+x])continue;
-  if(Math.hypot(x-S.start.x,y-S.start.y)<24)continue;
-  if(S.founded&&S.blds.some(b=>b.team==='p'&&Math.hypot(b.x-x,b.y-y)<22))continue;
-  if(KINGS.some(k=>Math.hypot(k.x-x,k.y-y)<14))continue;
-  if(S.camps.some(c=>c.alive&&Math.hypot(c.x-x,c.y-y)<14))continue;
+  if(Math.hypot(x-S.start.x,y-S.start.y)<34)continue;
+  if(S.founded&&S.blds.some(b=>b.team==='p'&&Math.hypot(b.x-x,b.y-y)<30))continue;
+  if(KINGS.some(k=>Math.hypot(k.x-x,k.y-y)<18))continue;
+  if(S.camps.some(c=>c.alive&&Math.hypot(c.x-x,c.y-y)<20))continue;
   for(let dy=-3;dy<=4;dy++)for(let dx=-3;dx<=4;dx++){const X=x+dx,Y=y+dy;if(inMap(X,Y)&&OCC[Y*MW+X]===0&&T[Y*MW+X]!==1&&T[Y*MW+X]!==0){T[Y*MW+X]=0;RA[Y*MW+X]=0;}}
   if(!walkRect(x,y,2,2))continue;
   const tent=mkB('tent','b',x,y,true);
   const c={id:S.camps.length+1,x,y,tent:tent.id,alive:true};
   S.camps.push(c);
-  const far=Math.hypot(x-S.start.x,y-S.start.y)>40;
-  const n2=3+(S.day>20?1:0)+(far?1:0);
+  const far=Math.hypot(x-S.start.x,y-S.start.y)>60;
+  const n2=3+(S.day>30?1:0)+(far?1:0);
   for(let k=0;k<n2;k++){
    const t=k===0&&far?'haydutreis':k===n2-1?'haydutokcu':'haydut';
    mkUnit(t,'b',x+0.5+(k%3)-1+0.3,y+2.5+(k/3|0),{guard:1,hx:x+1,hy:y+3,st:'idle'});
@@ -131,7 +154,7 @@ function costText(c){return Object.keys(c).map(k=>RI[k]+c[k]).join(' ');}
 function econ(dt){
  if(!S.founded)return;
  const pop=popNow();
- S.res.food-=pop*0.027*dt;
+ S.res.food-=pop*0.022*dt;
  if(S.res.food<=0){
   S.res.food=0;S.starve+=dt;
   if(S.starve>=15){
@@ -142,7 +165,7 @@ function econ(dt){
   }
  }else S.starve=Math.max(0,S.starve-dt);
  if(seas()===3){
-  S.res.wood-=pop*0.02*fxm('heat')*dt;
+  S.res.wood-=pop*0.016*fxm('heat')*(S.hardWinter?1.5:1)*dt;
   if(S.res.wood<=0){
    S.res.wood=0;S.cold+=dt;
    if(S.cold>=20){
@@ -152,7 +175,7 @@ function econ(dt){
    }
   }else S.cold=Math.max(0,S.cold-dt);
  }
- if(S.research){S.research.left-=dt;if(S.research.left<=0){const t=TECH[S.research.id];S.techs[S.research.id]=1;S.research=null;log('🔬 Araştırma tamam: '+t.n);}}
+ if(S.research){S.research.left-=dt*fxm('research');if(S.research.left<=0){const t=TECH[S.research.id];S.techs[S.research.id]=1;S.research=null;log('🔬 Araştırma tamam: '+t.n);}}
  if(S.ageProg){S.ageProg.left-=dt;if(S.ageProg.left<=0){S.age=S.ageProg.to;S.ageProg=null;showModal('🌟 '+AGES[S.age],'Yeni çağa ulaştın! Yeni binalar, birlikler ve teknolojiler açıldı.',[{t:'Harika'}]);}}
 }
 let accJ=0,accS=0;
@@ -270,7 +293,9 @@ function loadGame(){
  try{
   const raw=localStorage.getItem('ky_save');if(!raw)return false;
   const d=JSON.parse(raw);
-  S=JSON.parse(d.s);
+  const S2=JSON.parse(d.s);
+  if(d.T.length!==NN||!S2.dyn)return false;
+  S=S2;
   T=Uint8Array.from(d.T.split('').map(Number));
   RA=Float32Array.from(d.RA.split(',').map(Number));
   ROAD=Uint8Array.from(d.R.split('').map(Number));
