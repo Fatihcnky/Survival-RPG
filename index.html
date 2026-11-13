@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Survival-RPG · Hanedan V4.0 Gerçekçilik Güncellemesi</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        html, body { width: 100%; height: 100dvh; overflow: hidden; background: #141e22; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #e9ecef; touch-action: manipulation; }
+        #gameCanvas { display: block; width: 100%; height: 100dvh; touch-action: none; }
+
+        /* Üst HUD */
+        .hud-top { position: fixed; top: max(8px, env(safe-area-inset-top)); left: 8px; right: 126px; display: flex; flex-direction: column; gap: 4px; pointer-events: none; z-index: 20; }
+        .resource-bar, .calendar-bar { background: rgba(16, 24, 32, 0.95); padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); font-size: 11.5px; display: flex; flex-wrap: wrap; gap: 5px 10px; align-items: center; pointer-events: auto; }
+        .ver-badge { background: #e76f51; color: #fff; padding: 2px 6px; border-radius: 4px; font-weight: 800; font-size: 10px; }
+        
+        .speed-capsule { position: fixed; top: max(8px, env(safe-area-inset-top)); right: 8px; display: flex; background: rgba(16, 24, 32, 0.95); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); padding: 2px; z-index: 20; }
+        .speed-btn { background: transparent; border: none; color: #adb5bd; padding: 6px 10px; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 6px; }
+        .speed-btn.active { background: #457b9d; color: #fff; }
+
+        /* İlerleme Çubukları */
+        .action-progress-bar { position: absolute; width: 40px; height: 6px; background: rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.3); border-radius: 3px; display: none; z-index: 30; pointer-events: none; }
+        .action-progress-fill { width: 0%; height: 100%; background: #e9c46a; }
+
+        /* Lider Aktif Toplama */
+        .floating-action-bar { position: fixed; bottom: calc(max(10px, env(safe-area-inset-bottom)) + 54px); left: 50%; transform: translateX(-50%); display: none; z-index: 25; }
+        .hero-btn { background: #1d2d35; color: #e9c46a; border: 1px solid #e9c46a; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+        
+        /* Modallar & Arayüz */
+        .modal-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); display: none; align-items: center; justify-content: center; z-index: 50; padding: 10px; }
+        .modal-box { background: #1a2228; border: 1px solid #457b9d; border-radius: 8px; width: 100%; max-width: 600px; max-height: 85dvh; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
+        .modal-header h3 { font-size: 16px; color: #e9c46a; margin: 0; }
+        .close-x { background: rgba(255,255,255,0.1); border: none; color: #fff; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        
+        .table-grid { display: grid; grid-template-columns: 2fr 1fr 1.5fr; gap: 8px; font-size: 12px; align-items: center; padding: 6px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .table-header { font-weight: bold; color: #adb5bd; border-bottom: 1px solid rgba(255,255,255,0.2); }
+        
+        select { background: #2a343b; color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 4px; border-radius: 4px; font-size: 12px; }
+        .action-btn { background: #2a9d8f; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; }
+        .action-btn.red { background: #e63946; }
+        .action-btn.outline { background: transparent; border: 1px solid #adb5bd; color: #adb5bd; }
+
+        /* Alt Dock */
+        .hud-bottom { position: fixed; bottom: max(10px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); display: flex; gap: 6px; background: rgba(16, 24, 32, 0.95); padding: 6px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); z-index: 22; width: max-content; }
+        .dock-btn { background: rgba(255,255,255,0.05); border: 1px solid transparent; color: #adb5bd; padding: 10px 14px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; }
+        .dock-btn.active { background: #e9c46a; color: #1d2d35; }
+        
+        .toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: #e9c46a; color: #1d2d35; padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: bold; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 70; }
+        .toast.show { opacity: 1; }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    
+    <div id="leaderProgressBar" class="action-progress-bar"><div id="leaderProgressFill" class="action-progress-fill"></div></div>
+
+    <div class="hud-top">
+        <div class="resource-bar">
+            <span class="ver-badge">V4.0</span>
+            <span id="resText">Yükleniyor...</span>
+        </div>
+        <div class="calendar-bar">
+            <span id="calText">Kayıt Bekleniyor</span>
+        </div>
+    </div>
+
+    <div class="speed-capsule">
+        <button class="speed-btn" data-speed="PAUSED">||</button>
+        <button class="speed-btn active" data-speed="NORMAL">1x</button>
+        <button class="speed-btn" data-speed="FAST">2x</button>
+    </div>
+
+    <div id="leaderActionBar" class="floating-action-bar">
+        <button id="leaderActionBtn" class="hero-btn">Eylem</button>
+    </div>
+
+    <div class="hud-bottom">
+        <button class="dock-btn" id="buildBtn">🔨 İnşa</button>
+        <button class="dock-btn" id="manageBtn">👥 Yönetim</button>
+        <button class="dock-btn" id="researchBtn">🔬 Teknoloji</button>
+        <button class="dock-btn" id="militaryBtn">⚔️ Ordu (Yakında)</button>
+    </div>
+
+    <div id="modalBackdrop" class="modal-backdrop">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="modalTitle">Başlık</h3>
+                <button class="close-x" id="modalCloseBtn">✕</button>
+            </div>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+    <div id="toast" class="toast"></div>
+
+    <script>
+    function bindTap(el, handler) { if (el) el.addEventListener('click', (e) => { e.stopPropagation(); handler(e); }); }
+
+    // --- TEMEL SİSTEMLER ---
+    const BASE_TILE = 44;
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Gerçekçi Hız: 1 Gün = 4 Dakika (Önceki 90 saniyeydi)
+    const TIME = { speedMultiplier: 1, hourOfDay: 8, day: 1, year: 1, realSecPerDay: 240 };
+    
+    // Gerçekçi Kaynak Kapasitesi
+    const ECO = {
+        maxStorage: 50, // Merkez ambarı olmadan sadece 50 birim saklanabilir
+        stock: { LOG: 30, STONE: 15, FIREWOOD: 10, WHEAT: 20, BREAD: 10, GOLD: 50 },
+        add: function(res, amt) {
+            let limit = this.maxStorage + (grid.buildings.filter(b=>b.subType==='WAREHOUSE').length * 200);
+            this.stock[res] = Math.min(limit, Math.max(0, (this.stock[res] || 0) + amt));
+        },
+        has: function(cost) { return Object.entries(cost).every(([r, q]) => (this.stock[r] || 0) >= q); },
+        pay: function(cost) { if(!this.has(cost)) return false; Object.entries(cost).forEach(([r,q]) => this.stock[r]-=q); return true; }
+    };
+
+    const TIER_REQ = [
+        { id: 'CAMP', name: 'Sürgün Kampı', pop: 0 },
+        { id: 'VILLAGE', name: 'Köy', pop: 6, bldReq: 'HOME' },
+        { id: 'TOWN', name: 'Kasaba', pop: 12, bldReq: 'TAVERN' },
+        { id: 'FIEFDOM', name: 'Derebeylik', pop: 25, bldReq: 'SMITHY' }
+    ];
+
+    function getSettlementTier() {
+        let current = TIER_REQ[0];
+        const pop = villagers.length;
+        for (const t of TIER_REQ) {
+            if (pop >= t.pop && (!t.bldReq || grid.buildings.some(b => b.subType === t.bldReq))) current = t;
+        }
+        return current.name;
+    }
+
+    const grid = {
+        cols: 42, rows: 32, tiles: [], buildings: [],
+        init: function() {
+            for(let y=0; y<this.rows; y++) {
+                let row = [];
+                for(let x=0; x<this.cols; x++) row.push({x, y, type: 'GRASS', buildingId: null});
+                this.tiles.push(row);
+            }
+            // Basit Orman & Taş
+            for(let y=8; y<14; y++) for(let x=8; x<14; x++) if(Math.random()<0.6) this.tiles[y][x].type = 'FOREST';
+            this.tiles[10][10].type = 'STONE_NODE'; this.tiles[10][11].type = 'STONE_NODE';
+        }
+    };
+    grid.init();
+
+    const leader = { x: 20, y: 15, targetX: null, targetY: null, actionTimer: 0, actionTotal: 0, actionType: null };
+    const villagers = [];
+    for(let i=0; i<4; i++) villagers.push({ id: 'v'+i, name: 'Köylü '+(i+1), x: 20+i, y: 16, job: 'Serbest', state: 'Bekliyor', hunger: 10, targetBld: null });
+
+    const BUILDINGS = [
+        { id: 'ROAD', name: 'Toprak Yol', cost: { LOG: 1 }, category: 'ROAD' },
+        { id: 'HOME', name: 'Konut', cost: { LOG: 15, STONE: 5 }, category: 'HOME', desc: '+3 Nüfus Kapasitesi' },
+        { id: 'GATHERER', name: 'Oduncu Kampı', cost: { LOG: 10 }, category: 'WORK', desc: 'Ormandan odun toplar' },
+        { id: 'WAREHOUSE', name: 'Ambar', cost: { LOG: 25, STONE: 15 }, category: 'STORAGE', desc: '+200 Depo Kapasitesi' }
+    ];
+
+    let uiMode = null; // 'BUILD_SELECT', 'ROAD_DRAG'
+    let selectedBuild = null;
+    let dragStart = null, currentDrag = null;
+
+    // --- UI VE YÖNETİM MODALLARI ---
+    function showToast(msg) {
+        const el = document.getElementById('toast');
+        el.textContent = msg; el.classList.add('show');
+        setTimeout(() => el.classList.remove('show'), 2000);
+    }
+
+    function openModal(title, html) {
+        document.getElementById('modalTitle').textContent = title;
+        document.getElementById('modalContent').innerHTML = html;
+        document.getElementById('modalBackdrop').style.display = 'flex';
+    }
+    bindTap(document.getElementById('modalCloseBtn'), () => document.getElementById('modalBackdrop').style.display = 'none');
+
+    // Nüfus & Meslek Yönetimi Paneli
+    bindTap(document.getElementById('manageBtn'), () => {
+        const workBlds = grid.buildings.filter(b => b.category === 'WORK');
+        let html = `<div style="margin-bottom:10px; color:#adb5bd;">Toplam Nüfus: ${villagers.length} / ${(grid.buildings.filter(b=>b.category==='HOME').length * 3) + 4}</div>`;
+        html += `<div class="table-grid table-header"><div>İsim</div><div>Durum</div><div>Meslek Ataması</div></div>`;
+        
+        villagers.forEach(v => {
+            let options = `<option value="Serbest" ${v.job === 'Serbest' ? 'selected' : ''}>Serbest (İnşaat/Taşıma)</option>`;
+            workBlds.forEach(b => {
+                options += `<option value="${b.id}" ${v.job === b.id ? 'selected' : ''}>${b.name} İşçisi</option>`;
+            });
+            
+            html += `
+            <div class="table-grid">
+                <div><b>${v.name}</b><br><span style="font-size:10px; color:#e76f51;">Açlık: %${Math.floor(v.hunger)}</span></div>
+                <div>${v.state}</div>
+                <div><select data-vid="${v.id}">${options}</select></div>
+            </div>`;
+        });
+        openModal('👥 Merkezi Nüfus Yönetimi', html);
+
+        document.querySelectorAll('select[data-vid]').forEach(sel => {
+            sel.addEventListener('change', (e) => {
+                const vil = villagers.find(x => x.id === e.target.dataset.vid);
+                if (vil) { vil.job = e.target.value; vil.state = 'Yeni işe gidiyor'; }
+            });
+        });
+    });
+
+    // İnşaat Paneli
+    bindTap(document.getElementById('buildBtn'), () => {
+        let html = BUILDINGS.map(b => `
+            <div style="border: 1px solid #457b9d; padding: 10px; margin-bottom: 8px; border-radius: 6px; display:flex; justify-content:space-between; align-items:center;">
+                <div><b>${b.name}</b><br><span style="font-size:11px; color:#adb5bd;">Maliyet: ${Object.entries(b.cost).map(([k,v])=>v+' '+k).join(', ')}</span></div>
+                <button class="action-btn" data-build="${b.id}">Seç</button>
+            </div>
+        `).join('');
+        openModal('🔨 İnşaat Planlaması', html);
+
+        document.querySelectorAll('[data-build]').forEach(btn => {
+            bindTap(btn, () => {
+                selectedBuild = BUILDINGS.find(x => x.id === btn.dataset.build);
+                uiMode = selectedBuild.id === 'ROAD' ? 'ROAD_DRAG' : 'BUILD_SELECT';
+                document.getElementById('modalBackdrop').style.display = 'none';
+                showToast(`${selectedBuild.name} seçildi. Haritaya dokunun.`);
+            });
+        });
+    });
+
+    // Yıkım ve Bina İnceleme
+    function openBuildingInspect(bld) {
+        openModal(`Bina: ${bld.name}`, `
+            <div style="margin-bottom:15px; font-size:13px;">Bu bina aktif olarak çalışmaktadır.</div>
+            <button class="action-btn red" id="btnDemolish">💥 Binayı Yık (%50 Kaynak İadesi)</button>
+        `);
+        bindTap(document.getElementById('btnDemolish'), () => {
+            grid.buildings = grid.buildings.filter(x => x.id !== bld.id);
+            grid.tiles[bld.y][bld.x].buildingId = null;
+            Object.entries(bld.cost).forEach(([res, qty]) => ECO.add(res, Math.floor(qty * 0.5)));
+            document.getElementById('modalBackdrop').style.display = 'none';
+            showToast(`${bld.name} yıkıldı. Kaynaklar ambara eklendi.`);
+        });
+    }
+
+    // --- ETKİLEŞİM & OYNANIŞ ---
+    canvas.addEventListener('pointerdown', (e) => {
+        if(e.target !== canvas) return;
+        const gx = Math.floor(e.clientX / BASE_TILE), gy = Math.floor(e.clientY / BASE_TILE);
+        
+        if (uiMode === 'ROAD_DRAG') {
+            dragStart = { x: gx, y: gy }; currentDrag = { x: gx, y: gy };
+        } else if (uiMode === 'BUILD_SELECT') {
+            if (!ECO.pay(selectedBuild.cost)) { showToast('Yetersiz kaynak!'); return; }
+            grid.buildings.push({ id: 'b_'+Date.now(), name: selectedBuild.name, category: selectedBuild.category, subType: selectedBuild.id, x: gx, y: gy, cost: selectedBuild.cost });
+            grid.tiles[gy][gx].buildingId = 'b_'+Date.now();
+            uiMode = null; selectedBuild = null; showToast('Bina temeli atıldı!');
+        } else {
+            const bld = grid.buildings.find(b => b.x === gx && b.y === gy);
+            if(bld) { openBuildingInspect(bld); return; }
+            
+            leader.targetX = gx; leader.targetY = gy;
+            leader.actionTimer = 0; leader.actionType = null;
+            document.getElementById('leaderActionBar').style.display = 'none';
+            document.getElementById('leaderProgressBar').style.display = 'none';
+            
+            const tile = grid.tiles[gy][gx];
+            if (tile.type === 'FOREST' || tile.type === 'STONE_NODE') {
+                leader.actionType = tile.type;
+                leader.actionTotal = tile.type === 'FOREST' ? 2.5 : 4.0; // Ağaç 2.5 sn, Taş 4 sn
+                const btn = document.getElementById('leaderActionBtn');
+                btn.textContent = tile.type === 'FOREST' ? '🪵 Odun Kes (2.5sn)' : '🪨 Taş Kır (4sn)';
+                document.getElementById('leaderActionBar').style.display = 'block';
+            }
+        }
+    });
+
+    canvas.addEventListener('pointermove', (e) => {
+        if(dragStart && uiMode === 'ROAD_DRAG') {
+            currentDrag = { x: Math.floor(e.clientX / BASE_TILE), y: Math.floor(e.clientY / BASE_TILE) };
+        }
+    });
+
+    canvas.addEventListener('pointerup', (e) => {
+        if(dragStart && uiMode === 'ROAD_DRAG') {
+            // Basit yatay/dikey yol çekimi
+            const minX = Math.min(dragStart.x, currentDrag.x), maxX = Math.max(dragStart.x, currentDrag.x);
+            const minY = Math.min(dragStart.y, currentDrag.y), maxY = Math.max(dragStart.y, currentDrag.y);
+            let cost = 0;
+            
+            if (maxX - minX > maxY - minY) {
+                for(let x=minX; x<=maxX; x++) if(grid.tiles[dragStart.y][x].type === 'GRASS') { grid.tiles[dragStart.y][x].type = 'ROAD'; cost++; }
+            } else {
+                for(let y=minY; y<=maxY; y++) if(grid.tiles[y][dragStart.x].type === 'GRASS') { grid.tiles[y][dragStart.x].type = 'ROAD'; cost++; }
+            }
+            if(cost > 0 && ECO.pay({ LOG: cost })) showToast(`${cost} birim yol döşendi.`);
+            else if(cost > 0) showToast('Yol için yeterli Odun yok!');
+            
+            dragStart = null; currentDrag = null; uiMode = null; selectedBuild = null;
+        }
+    });
+
+    bindTap(document.getElementById('leaderActionBtn'), () => {
+        document.getElementById('leaderActionBar').style.display = 'none';
+        leader.actionTimer = leader.actionTotal;
+        const pb = document.getElementById('leaderProgressBar');
+        pb.style.display = 'block';
+        pb.style.left = (leader.x * BASE_TILE) + 'px';
+        pb.style.top = (leader.y * BASE_TILE - 15) + 'px';
+    });
+
+    // --- OYUN DÖNGÜSÜ ---
+    let lastTime = performance.now();
+    function loop(now) {
+        const dt = Math.min(0.1, (now - lastTime)/1000);
+        lastTime = now;
+        
+        // Zaman Akışı
+        if(TIME.speedMultiplier > 0) {
+            TIME.hourOfDay += dt * TIME.speedMultiplier * (24 / TIME.realSecPerDay);
+            if(TIME.hourOfDay >= 24) { TIME.hourOfDay -= 24; TIME.day++; }
+            
+            document.getElementById('calText').textContent = `Gün ${TIME.day} (${Math.floor(TIME.hourOfDay)}:00) · Yerleşim: ${getSettlementTier()}`;
+            document.getElementById('resText').textContent = `🪵${ECO.stock.LOG} 🪨${ECO.stock.STONE} 🍞${ECO.stock.BREAD} 🪙${ECO.stock.GOLD} | Depo: ${Math.floor(Object.values(ECO.stock).reduce((a,b)=>a+b,0))}/${ECO.maxStorage + (grid.buildings.filter(b=>b.subType==='WAREHOUSE').length * 200)}`;
+        }
+
+        // Lider Eylem İlerlemesi
+        if (leader.actionTimer > 0) {
+            leader.actionTimer -= dt;
+            document.getElementById('leaderProgressFill').style.width = (100 - (leader.actionTimer / leader.actionTotal * 100)) + '%';
+            if (leader.actionTimer <= 0) {
+                document.getElementById('leaderProgressBar').style.display = 'none';
+                if(leader.actionType === 'FOREST') { ECO.add('LOG', 5); showToast('+5 Tomruk'); }
+                if(leader.actionType === 'STONE_NODE') { ECO.add('STONE', 4); showToast('+4 Taş'); }
+                leader.actionType = null;
+            }
+        }
+
+        // Basit Çizim
+        ctx.clearRect(0,0, canvas.width, canvas.height);
+        for(let y=0; y<grid.rows; y++) {
+            for(let x=0; x<grid.cols; x++) {
+                const t = grid.tiles[y][x];
+                ctx.fillStyle = t.type==='ROAD' ? '#9c7a50' : t.type==='FOREST' ? '#2d6a4f' : t.type==='STONE_NODE' ? '#6c757d' : '#40916c';
+                ctx.fillRect(x*BASE_TILE, y*BASE_TILE, BASE_TILE-1, BASE_TILE-1);
+                
+                if(dragStart && uiMode === 'ROAD_DRAG') {
+                    const minX = Math.min(dragStart.x, currentDrag.x), maxX = Math.max(dragStart.x, currentDrag.x);
+                    const minY = Math.min(dragStart.y, currentDrag.y), maxY = Math.max(dragStart.y, currentDrag.y);
+                    if((maxX - minX > maxY - minY && y === dragStart.y && x >= minX && x <= maxX) || (maxX - minX <= maxY - minY && x === dragStart.x && y >= minY && y <= maxY)) {
+                        ctx.fillStyle = 'rgba(233, 196, 106, 0.5)';
+                        ctx.fillRect(x*BASE_TILE, y*BASE_TILE, BASE_TILE, BASE_TILE);
+                    }
+                }
+            }
+        }
+        
+        grid.buildings.forEach(b => {
+            ctx.fillStyle = b.category === 'HOME' ? '#e76f51' : b.category === 'STORAGE' ? '#f4a261' : '#457b9d';
+            ctx.fillRect(b.x*BASE_TILE+2, b.y*BASE_TILE+2, BASE_TILE-4, BASE_TILE-4);
+        });
+
+        villagers.forEach(v => {
+            ctx.fillStyle = '#e9c46a';
+            ctx.beginPath(); ctx.arc(v.x*BASE_TILE + BASE_TILE/2, v.y*BASE_TILE + BASE_TILE/2, 6, 0, Math.PI*2); ctx.fill();
+        });
+
+        // Lider Çizimi
+        ctx.fillStyle = '#e63946';
+        ctx.beginPath(); ctx.arc(leader.x*BASE_TILE + BASE_TILE/2, leader.y*BASE_TILE + BASE_TILE/2, 8, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = '#fff'; ctx.stroke();
+
+        requestAnimationFrame(loop);
+    }
+    
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+        bindTap(btn, () => {
+            TIME.speedMultiplier = btn.dataset.speed === 'PAUSED' ? 0 : btn.dataset.speed === 'FAST' ? 3 : 1;
+            document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        });
+    });
+
+    requestAnimationFrame(loop);
+    </script>
+</body>
+</html>
