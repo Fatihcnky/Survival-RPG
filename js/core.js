@@ -58,23 +58,33 @@ function nearestB(u,fn){let best=null,bd=1e9;for(const b of S.blds){if(b.hp<=0||
 function hostile(a,b){
  const x=a.team,y=b.team;
  if(x==='w'||y==='w'){const w=x==='w'?a:b,o=x==='w'?b:a;return !!(UT[w.t]&&UT[w.t].aggr)&&!o.w&&(o.team==='p'||o.team==='a');}
+ if(x==='f'||y==='f'){return x!==y&&(x==='b'||y==='b');}
  if(x===y||x==='n'||y==='n')return false;
  const f=t=>t==='p'||t==='a';
  if(f(x)&&f(y))return false;
  if((x==='k'&&y==='b')||(x==='b'&&y==='k'))return false;
  return true;
 }
+const GC=8,GW=Math.ceil(MW/GC);let UGR=null,BGR=null,ugT=-9;
+function rebuildGrid(){
+ UGR=new Array(GW*GW);BGR=new Array(GW*GW);ugT=S.t;
+ for(const o of S.units){if(o.dead)continue;const k=((o.y/GC)|0)*GW+((o.x/GC)|0);(UGR[k]||(UGR[k]=[])).push(o);}
+ for(const b of S.blds){if(b.decor||b.hp<=0)continue;
+  for(let gy=(b.y/GC)|0;gy<=((b.y+b.h-1)/GC)|0;gy++)for(let gx=(b.x/GC)|0;gx<=((b.x+b.w-1)/GC)|0;gx++){const k=gy*GW+gx;(BGR[k]||(BGR[k]=[])).push(b);}}
+}
 function nearestEnemy(u,r,unitsOnly){
+ if(!UGR||S.t-ugT>0.25||S.t<ugT)rebuildGrid();
  let best=null,bd=r*r;
- for(const o of S.units){
-  if(o.dead||o===u||!hostile(u,o))continue;
-  const dx=o.x-u.x,dy=o.y-u.y,dd=dx*dx+dy*dy;
-  if(dd<bd){bd=dd;best=o;}
- }
- if(!unitsOnly)for(const b of S.blds){
-  if(b.decor||b.hp<=0||!hostile(u,b))continue;
-  const d=dEnt(u,b);
-  if(d*d<bd){bd=d*d;best=b;}
+ const g0x=Math.max(0,((u.x-r)/GC)|0),g1x=Math.min(GW-1,((u.x+r)/GC)|0),g0y=Math.max(0,((u.y-r)/GC)|0),g1y=Math.min(GW-1,((u.y+r)/GC)|0);
+ for(let gy=g0y;gy<=g1y;gy++)for(let gx=g0x;gx<=g1x;gx++){
+  const L=UGR[gy*GW+gx];
+  if(L)for(const o of L){
+   const dx=o.x-u.x,dy=o.y-u.y,dd=dx*dx+dy*dy;
+   if(dd>=bd||o.dead||o===u||!hostile(u,o))continue;
+   bd=dd;best=o;
+  }
+  if(!unitsOnly){const B=BGR[gy*GW+gx];
+   if(B)for(const b of B){if(b.hp<=0||!hostile(u,b))continue;const d=dEnt(u,b);if(d*d<bd){bd=d*d;best=b;}}}
  }
  return best;
 }

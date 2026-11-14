@@ -1,6 +1,6 @@
 'use strict';
 // ===== SABİTLER VE VERİ TABLOLARI =====
-const TS=32,MW=160,MH=160,DAY=40,SEASON_DAYS=10;
+const TS=32,MW=224,MH=224,DAY=40,SEASON_DAYS=10;
 const SEASONS=['İlkbahar','Yaz','Sonbahar','Kış'];
 const AGES=['Taş Çağı','Bronz Çağı','Demir Çağı','Orta Çağ','Barut Çağı'];
 const RANKS=['Köy','Kale','Şehir','Lordluk','Krallık'];
@@ -54,7 +54,18 @@ const BT={
  saray:{n:'Saray',ic:'👑',w:4,h:4,hp:1000,age:3,rank:3,cost:{stone:500,gold:300,wood:300},time:60,pop:20,col:'#c9a227',d:'Krallık ünvanı için gerekli.'},
  tent:{n:'Haydut Çadırı',ic:'⛺',w:2,h:2,hp:220,cost:{},time:0,col:'#6a2a2a',enemy:1},
  ktc:{n:'Krallık Merkezi',ic:'🏰',w:4,h:4,hp:1,col:'#777',decor:1},
+ ftc:{n:'Krallık Merkezi',ic:'🏰',w:4,h:4,hp:1800,col:'#777',foreign:1},
+ fev:{n:'Köylü Evi',ic:'🏠',w:2,h:2,hp:160,col:'#8a6a4a',foreign:1},
+ fciftlik:{n:'Çiftlik',ic:'🌾',w:3,h:3,hp:160,col:'#b59a3a',foreign:1},
+ fkisla:{n:'Kışla',ic:'⚔',w:3,h:3,hp:320,col:'#6b6b6b',foreign:1},
+ fkale:{n:'Kale',ic:'🏯',w:3,h:3,hp:900,col:'#888',foreign:1},
  khouse:{n:'Ev',ic:'🏠',w:2,h:2,hp:1,col:'#8a6a4a',decor:1}
+};
+const UPG={
+ ev:{n:'Taş Ev',cost:{wood:80,stone:60},age:1,d:'+4 nüfus kapasitesi, daha sağlam.'},
+ ciftlik:{n:'Gelişmiş Çiftlik',cost:{wood:80,stone:40},age:1,d:'Verim +%50.'},
+ agil:{n:'Büyük Ağıl',cost:{wood:80,stone:40},age:1,d:'Verim +%50.'},
+ depo:{n:'Büyük Depo',cost:{wood:120,stone:80},age:1,d:'Depolama +300.'}
 };
 const BCAT=[
  ['Temel',['ev','depo','ciftlik','agil','avci']],
@@ -71,6 +82,7 @@ const UT={
  atliokcu:{n:'Atlı Okçu',g:'🏇',hp:55,atk:7,rng:5.5,rof:1.3,spd:3.8,arm:0,cost:{food:60,gold:40},time:16,age:2,mil:1,ranged:1,cav:1},
  atli:{n:'Atlı Şövalye',g:'🐎',hp:110,atk:12,rng:1.4,rof:1.1,spd:3.6,arm:2,cost:{food:80,iron:40,gold:20,silah:1,zirh:1},time:18,age:2,mil:1,cav:1},
  top:{n:'Top',g:'💣',hp:90,atk:50,rng:8,rof:4,spd:1.2,arm:0,cost:{wood:150,iron:100,gold:60,silah:3},time:30,age:4,mil:1,ranged:1,siege:1},
+ fkoylu:{n:'Köylü',g:'👨‍🌾',hp:30,atk:2,rng:1,rof:1.5,spd:2.3,arm:0},
  haydut:{n:'Haydut',g:'🗡',hp:55,atk:8,rng:1.3,rof:1.1,spd:2.2,arm:1},
  haydutokcu:{n:'Haydut Okçu',g:'🏹',hp:35,atk:6,rng:5.5,rof:1.5,spd:2.2,arm:0,ranged:1},
  haydutatli:{n:'Atlı Haydut',g:'🐎',hp:80,atk:10,rng:1.4,rof:1.1,spd:3.4,arm:1,cav:1},
@@ -79,7 +91,7 @@ const UT={
  kurt:{n:'Kurt',g:'🐺',hp:42,atk:8,rng:1.2,rof:1.0,spd:3.2,arm:0,wild:1,aggr:1},
  haydutreis:{n:'Haydut Reisi',g:'🪓',hp:170,atk:15,rng:1.4,rof:1.1,spd:2.2,arm:3}
 };
-const TEAMCOL={p:'#3b82f6',a:'#22c55e',b:'#dc2626',k:'#f59e0b',w:'#8a6a3a'};
+const TEAMCOL={p:'#3b82f6',a:'#22c55e',b:'#dc2626',k:'#f59e0b',f:'#a3e635',w:'#8a6a3a'};
 
 const TECH={
  tasbalta:{n:'Taş Balta',age:0,cost:{food:60,wood:60},time:25,fx:{gather:1.25},d:'Odun, taş, demir, altın toplama +%25'},
@@ -114,12 +126,12 @@ const RANKREQ=[null,
  {houses:42,pop:120,age:3,b:['saray'],reward:{gold:1000}}
 ];
 const KINGS=[
- {n:'Kuzey Lordluğu',who:'Lord Aldric',x:80,y:16,pers:'bilge',col:'#4a7fd0',d:'Bilge ve temkinli bir lord.',fam:['Leydi Mirel','Lord Cedric']},
- {n:'Doğu Krallığı',who:'Kral Maran',x:144,y:80,pers:'savasci',col:'#d04a4a',d:'Savaşçı, kolay öfkelenir.',fam:['Prenses Valeria','Prens Borin']},
- {n:'Güney Hanlığı',who:'Han Tolga',x:80,y:144,pers:'acgozlu',col:'#d0a43a',d:'Altına düşkün bir tüccar han.',fam:['Hanım Aysel','Prens Kağan']},
- {n:'Batı Beyliği',who:'Bey Sevran',x:16,y:80,pers:'dost',col:'#5bb36a',d:'Dost canlısı, barışsever.',fam:['Leydi Rowena','Şövalye Edmund']},
- {n:'Kuzeydoğu Dükalığı',who:'Dük Roderik',x:132,y:28,pers:'acgozlu',col:'#b070d0',d:'Hırslı bir dük, sınırları genişletmek ister.',fam:['Düşes Alina','Dük Tarik']},
- {n:'Güneybatı Hanedanı',who:'Leydi Elara',x:28,y:132,pers:'dost',col:'#40b8b0',d:'Bilgece yöneten, tüccarlara dost bir hanedan.',fam:['Prenses Iris','Prens Lucan']}
+ {n:'Kuzey Lordluğu',who:'Lord Aldric',x:112,y:24,pers:'bilge',col:'#4a7fd0',d:'Bilge ve temkinli bir lord.',fam:['Leydi Mirel','Lord Cedric']},
+ {n:'Doğu Krallığı',who:'Kral Maran',x:200,y:112,pers:'savasci',col:'#d04a4a',d:'Savaşçı, kolay öfkelenir.',fam:['Prenses Valeria','Prens Borin']},
+ {n:'Güney Hanlığı',who:'Han Tolga',x:112,y:200,pers:'acgozlu',col:'#d0a43a',d:'Altına düşkün bir tüccar han.',fam:['Hanım Aysel','Prens Kağan']},
+ {n:'Batı Beyliği',who:'Bey Sevran',x:24,y:112,pers:'dost',col:'#5bb36a',d:'Dost canlısı, barışsever.',fam:['Leydi Rowena','Şövalye Edmund']},
+ {n:'Kuzeydoğu Dükalığı',who:'Dük Roderik',x:186,y:38,pers:'acgozlu',col:'#b070d0',d:'Hırslı bir dük, sınırları genişletmek ister.',fam:['Düşes Alina','Dük Tarik']},
+ {n:'Güneybatı Hanedanı',who:'Leydi Elara',x:38,y:186,pers:'dost',col:'#40b8b0',d:'Bilgece yöneten, tüccarlara dost bir hanedan.',fam:['Prenses Iris','Prens Lucan']}
 ];
 const STORY=[
  {ch:'Bölüm 1 — Sürgün',t:'Köyünü kur: haritada gez, uygun bir yer bul ve "Köyü Kur" düğmesine bas.',ok:()=>S.founded,m:'Sürgün kafilesi nihayet yurt tuttu. Ateş yakıldı, ilk çadırlar kuruldu. Yaşlılar bu toprakların bereketli olduğunu söylüyor.'},

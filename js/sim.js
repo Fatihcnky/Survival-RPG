@@ -8,16 +8,12 @@ function newGame(seed){
   techs:{},research:null,ageProg:null,stats:{camps:0,kills:0,raids:0,lost:0},
   kings:KINGS.map(k=>({rel:{bilge:10,savasci:-10,acgozlu:0,dost:25}[k.pers],str:20,pact:null,war:false,cool:0,lastComplaint:-99,lastWar:-99})),
   mkt:{food:1,wood:1,stone:1,iron:1},raidAt:22,nextEvent:5,epi:null,drought:0,starve:0,cold:0,
-  start:{x:80,y:88},cam:{x:80,y:88,z:1},day:0,rally:null,done:false,won:false};
+  start:{x:112,y:124},cam:{x:112,y:124,z:1},day:0,rally:null,done:false,won:false};
  UM=new Map();BM=new Map();
  newDynasty();
  genMap();
  // krallıklar (dekor)
- KINGS.forEach((k,i)=>{
-  mkB('ktc','n',k.x-2,k.y-2,true,{kid:i});
-  [[-6,-1],[5,-3],[-5,5],[4,5],[-1,-7],[2,6]].forEach(([dx,dy])=>{const x=k.x+dx,y=k.y+dy;if(walkRect(x,y,2,2))mkB('khouse','n',x,y,true,{kid:i});});
- });
- makeCamps(12);spawnWildlife();
+ makeCamps(18);spawnWildlife();initKingdoms();
  // başlangıç kafilesi
  const st=S.start;
  for(let i=0;i<6;i++)mkUnit('koylu','p',st.x+0.5+(i%3)*0.8-0.8,st.y+0.5+(i/3|0)*0.8);
@@ -35,16 +31,16 @@ function spawnWild(t,minD){
  return false;
 }
 function spawnWildlife(){
- for(let i=0;i<70;i++)spawnWild('geyik',26);
- for(let i=0;i<28;i++)spawnWild('domuz',30);
- for(let i=0;i<14;i++)spawnWild('kurt',45);
+ for(let i=0;i<120;i++)spawnWild('geyik',26);
+ for(let i=0;i<50;i++)spawnWild('domuz',30);
+ for(let i=0;i<24;i++)spawnWild('kurt',45);
 }
 function wildDay(){
  const c={geyik:0,domuz:0,kurt:0};
  for(const u of S.units)if(u.team==='w'&&!u.dead)c[u.t]++;
- if(c.geyik<55&&Math.random()<0.5)spawnWild('geyik',25);
- if(c.domuz<22&&Math.random()<0.3)spawnWild('domuz',28);
- if(c.kurt<12&&Math.random()<0.12)spawnWild('kurt',40);
+ if(c.geyik<100&&Math.random()<0.5)spawnWild('geyik',25);
+ if(c.domuz<42&&Math.random()<0.3)spawnWild('domuz',28);
+ if(c.kurt<20&&Math.random()<0.12)spawnWild('kurt',40);
 }
 function walkRect(x,y,w,h){for(let dy=0;dy<h;dy++)for(let dx=0;dx<w;dx++){const X=x+dx,Y=y+dy;if(!inMap(X,Y))return false;const i=Y*MW+X;if(T[i]!==0||OCC[i]!==0)return false;}return true;}
 function makeCamps(n){
@@ -182,7 +178,7 @@ let accJ=0,accS=0;
 function sim(dt){
  S.t+=dt;
  const d=curDay();
- if(d!==S.day){S.day=d;if(S.founded)onDay();}
+ if(d!==S.day){S.day=d;if(S.founded)onDay();else kingdomsDay();}
  pathBudget=10;
  for(const u of S.units)updUnit(u,dt);
  if(S.units.some(u=>u.dead))S.units=S.units.filter(u=>!u.dead);
@@ -251,7 +247,7 @@ function placeBuilding(t,x,y){
  if(placeReason(t)||!canPlace(t,x,y))return false;
  if(!afford(d.cost)){log('⛔ Kaynak yetersiz.');return false;}
  pay(d.cost);
- const b=mkB(t,'p',x,y,t==='tc');
+ const b=mkB(t,'p',x,y,t==='tc',t==='ev'?{fam:pick(MNAMES.concat(FNAMES))}:null);
  FX.push({k:'poof',x:x+d.w/2,y:y+d.h/2,t:0.5,T:0.5});
  return b;
 }

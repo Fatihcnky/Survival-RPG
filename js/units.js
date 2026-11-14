@@ -4,13 +4,13 @@ const JOBRES={wood:[2,'wood'],stone:[3,'stone'],iron:[4,'iron'],gold:[5,'gold'],
 const JOBBT={};JOBS.forEach(j=>{if(j.bt)JOBBT[j.id]=j.bt;});
 const FARMS=[1.0,1.4,1.2,0.25],HERDS=[0.8,1,1,0.6],FORAGES=[1,1.2,1.6,0.15];
 
-function storeCap(){return 400+400*countB('depo',true)+fxa('store');}
+function storeCap(){let up=0;for(const b of S.blds)if(b.team==='p'&&b.t==='depo'&&b.done&&b.lvl)up+=300;return 400+400*countB('depo',true)+up+fxa('store');}
 function addRes(k,n){const c=storeCap();S.res[k]=Math.min(c,(S.res[k]||0)+n);}
 function afford(c){for(const k in c)if((S.res[k]||0)<c[k])return false;return true;}
 function pay(c){for(const k in c)S.res[k]-=c[k];}
 function popNow(){let n=0;for(const u of S.units)if(!u.dead&&u.team==='p')n++;return n;}
 function popQueued(){let n=0;for(const b of S.blds)if(b.team==='p')n+=b.q.length;return n;}
-function popCap(){let n=0;for(const b of S.blds)if(b.team==='p'&&b.done)n+=BT[b.t].pop||0;return n;}
+function popCap(){let n=0;for(const b of S.blds)if(b.team==='p'&&b.done)n+=(BT[b.t].pop||0)+(b.t==='ev'&&b.lvl?4:0);return n;}
 
 // ---------- köylü ----------
 function gatherRate(j){
@@ -86,8 +86,8 @@ function workTick(u,dt){
  if(!b||!b.done||b.hp<=0){u.st='idle';u.wb=0;return;}
  const j=u.job,s=seas();
  const hm=happyMul();
- if(j==='farm')addRes('food',0.10*dt*FARMS[s]*fxm('farm')*(S.drought>0?0.5:1)*hm);
- else if(j==='herd'){addRes('food',0.065*dt*HERDS[s]*hm);addRes('deri',0.012*dt*hm);}
+ if(j==='farm')addRes('food',0.10*dt*FARMS[s]*fxm('farm')*(S.drought>0?0.5:1)*hm*(b.lvl?1.5:1));
+ else if(j==='herd'){addRes('food',0.065*dt*HERDS[s]*hm*(b.lvl?1.5:1));addRes('deri',0.012*dt*hm);}
  else if(j==='trade')addRes('gold',0.07*dt*fxm('trade')*(1+0.25*pactCount())*hm);
  else if(j==='smith'){u.tm+=dt;if(u.tm>=12){
   const R=S.res;
@@ -206,9 +206,10 @@ function destroyB(b,a){
  if(b.t==='tent'){
   const c=S.camps.find(c=>c.tent===b.id);
   if(c){
-   c.alive=false;S.stats.camps++;
+   c.alive=false;
+   if(a&&(a.team==='p'||a.team==='a')){S.stats.camps++;
    const g=ri(60,150),f=ri(30,80);addRes('gold',g);addRes('food',f);
-   log('🏴 Haydut kampı yıkıldı! Ganimet: +'+g+' altın, +'+f+' yiyecek.',b.x,b.y);
+   log('🏴 Haydut kampı yıkıldı! Ganimet: +'+g+' altın, +'+f+' yiyecek.',b.x,b.y);}
   }
  }else if(b.team==='p'){
   log('💥 '+BT[b.t].n+' yıkıldı!',b.x,b.y);
@@ -336,6 +337,7 @@ function updUnit(u,dt){
  if(u.dead)return;
  if(u.team==='w'){updAnimal(u,dt);return;}
  if(u.team==='p'&&u.t==='koylu'){updVillager(u,dt);return;}
+ if(u.team==='f'&&u.t==='fkoylu'){updFolk(u,dt);return;}
  updFighter(u,dt);
 }
 

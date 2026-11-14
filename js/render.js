@@ -21,6 +21,7 @@ const US={
  p:{koylu:'u23',mizrakli:'u01',kilic:'u02',okcu:'u03',atliokcu:'u03',atli:'u02'},
  b:{haydut:'u09',haydutokcu:'u08',haydutatli:'u07',haydutreis:'u10'},
  a:{mizrakli:'u13',okcu:'u15',kilic:'u14'},
+ f:{fkoylu:'u23',mizrakli:'u19',okcu:'u20',kilic:'u21',atli:'u21'},
  k:{mizrakli:'u19',okcu:'u20',atli:'u21',kilic:'u21'}
 };
 const BADGE={okcu:'🏹',atliokcu:'🏇',atli:'🐎',top:'💣',haydutatli:'🐎',haydutokcu:'🏹'};
@@ -75,6 +76,8 @@ function drawBuilding(b){
   ctx.globalAlpha=b.done?1:0.5;
   ctx.drawImage(bi,b.x+0.02,b.y+0.02,b.w-0.04,b.h-0.04);
   ctx.globalAlpha=1;
+  if(b.lvl&&b.team==='p')ctx.drawImage(spr('⭐'),b.x+b.w-0.5,b.y+b.h-0.5,0.5,0.5);
+  if(b.team==='f'&&KINGS[b.kid]){ctx.fillStyle=KINGS[b.kid].col;ctx.fillRect(b.x+0.05,b.y+0.05,0.28,0.28);}
   if(b.team==='p'||b.team==='b'){ctx.fillStyle=b.team==='p'?TEAMCOL.p:TEAMCOL.b;ctx.fillRect(b.x+0.05,b.y+0.05,0.28,0.28);}
   if(b.team==='p'&&b.w>=2&&d.ic&&b.t!=='ev')ctx.drawImage(spr(d.ic),b.x+b.w-0.55,b.y+0.02,0.5,0.5);
  }else{
@@ -101,6 +104,7 @@ function drawUnit(u){
   ctx.drawImage(us,u.x-0.6,u.y-0.78-bob,1.2,1.2);
   if(u.fl&&S.t-u.fl<0.15){ctx.globalAlpha=0.5;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(u.x,u.y-0.15,0.3,0,6.3);ctx.fill();ctx.globalAlpha=1;}
   if(BADGE[u.t])ctx.drawImage(spr(BADGE[u.t]),u.x+0.1,u.y-0.1,0.42,0.42);
+  if(u.team==='f'&&KINGS[u.kid]){ctx.fillStyle=KINGS[u.kid].col;ctx.fillRect(u.x-0.5,u.y-0.78,0.22,0.22);}
  }else if(u.team==='w'){
   ctx.drawImage(spr(d.g),u.x-0.4,u.y-0.5,0.8,0.8);
  }else{

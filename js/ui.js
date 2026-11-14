@@ -79,6 +79,7 @@ function pPeople(){
  let h='<h4>Halk: '+n+' köylü · '+popNow()+'/'+cap+' nüfus · boşta: '+idleCount()+'</h4>';
  if(tc){h+='<div class="row">'+btn('🧑 Köylü çağır','train','koylu',false,tc.id)+btn('×5','train5','koylu',false,tc.id)+'<small>'+cstr(UT.koylu.cost)+' · kuyruk: '+tc.q.length+'</small></div>';}
  h+='<div class="row">'+btn('⚖ Otomatik dağıt','autojobs')+'<small>İş sırası: çiftçi → çoban → toplayıcı → oduncu → inşaatçı...</small></div>';
+ {const hs=S.blds.filter(b=>b.team==='p'&&b.t==='ev'&&b.done),hh=households();if(hs.length){h+='<h4>🏘 Haneler ('+hs.length+')</h4><small>'+hs.slice(0,12).map(b=>famName(b)+' '+(b.lvl?'⭐':'')+hh.get(b.id)).join(' · ')+(hs.length>12?' …':'')+'<br>Ev seçip ⬆ ile taş eve yükselt (+4 kişi).</small>';}}
  JOBS.forEach(j=>{
   const cap=jobCap(j.id),want=S.jobs[j.id]||0,have=jobCount(j.id);
   h+='<div class="row">'+j.ic+' <b style="width:110px;display:inline-block">'+j.n+'</b>'+btn('−','jm',j.id)+'<span style="min-width:44px;text-align:center">'+have+'/'+want+'</span>'+btn('+','jp',j.id)+'<small>'+(j.bt&&cap===0?'🔒 '+BT[j.bt].n+' gerekli':j.d+(j.bt?' · yuva: '+cap+' ('+countB(j.bt,true)+' bina)':''))+'</small></div>';
@@ -163,10 +164,21 @@ function pQuest(){
  h+=s?'<div>'+(s.ch?'<b>'+s.ch+'</b><br>':'')+s.t+(s.r?'<br><small>Ödül: '+costText(s.r)+'</small>':'')+'</div>':'<div>Tüm görevleri tamamladın! 🏆</div>';
  return h;
 }
+function households(){
+ const hs=S.blds.filter(b=>b.team==='p'&&b.t==='ev'&&b.done);
+ const cap=hs.reduce((a,b)=>a+5+(b.lvl?4:0),0),pop=popNow();
+ let left=Math.min(pop,cap);const out=new Map();
+ hs.forEach(b=>{const c=5+(b.lvl?4:0),n=Math.min(c,Math.round(Math.min(pop,cap)*c/Math.max(1,cap)));out.set(b.id,n);left-=n;});
+ for(const b of hs){if(left<=0)break;const c=5+(b.lvl?4:0);if(out.get(b.id)<c){out.set(b.id,out.get(b.id)+1);left--;}}
+ return out;
+}
+function famName(b){if(!b.fam)b.fam=pick(MNAMES.concat(FNAMES));return b.fam;}
 function pSel(){
  const b=BM.get(UI.sel.id);if(!b)return '';
  const d=BT[b.t];
  let h='<h4>'+d.ic+' '+d.n+(b.done?'':' (inşaat %'+Math.round(b.prog*100)+')')+'</h4><small>'+d.d+'<br>❤ '+Math.ceil(b.hp)+'/'+b.mhp+(b.fire>0?' · 🔥 yanıyor':'')+'</small>';
+ if(b.team==='p'&&b.done&&b.t==='ev'){const n=households().get(b.id)||0,kids=Math.round(n*0.35);h+='<div>👪 <b>'+famName(b)+' Hanesi</b>: '+n+' kişi ('+(n-kids)+' yetişkin, '+kids+' çocuk)'+(b.lvl?' · ⭐ Taş ev':'')+'</div>';}
+ if(b.team==='p'&&b.done&&UPG[b.t]){const u=UPG[b.t];if(b.lvl)h+='<div>⭐ '+u.n+' (yükseltildi)</div>';else{const why=u.age>S.age?'Çağ: '+AGES[u.age]:'';h+='<div class="row">'+btn('⬆ '+u.n,'upg',b.id,!!why||!afford(u.cost))+'<small>'+(why?'🔒 '+why:u.d+' '+cstr(u.cost))+'</small></div>';}}
  if(b.team==='p'&&b.done){
   trainList(b).forEach(t=>{const u=UT[t],why=canTrain(t);h+='<div class="row">'+btn(u.g+' '+u.n,'train',t,!!why,b.id)+btn('×5','train5',t,!!why,b.id)+'<small>'+(why?'🔒 '+why:cstr(u.cost))+'</small></div>';});
   if(b.q.length)h+='<small>Kuyruk: '+b.q.map(q=>UT[q.u].g).join(' ')+'</small>';
@@ -239,6 +251,7 @@ function act(a,v,w,el){
   case 'marry':proposeMarriage(+v);break;
   case 'selarmy':UI.sel={kind:'u',ids:soldiers().map(u=>u.id)};UI.tab=null;updPanel(true);break;
   case 'retreat':{const tc=mainTC();if(tc)cmdMove(soldiers(),tc.x+tc.w/2,tc.y+tc.h+1,false);break;}
+  case 'upg':{const b=BM.get(+v);if(b&&UPG[b.t]&&!b.lvl&&UPG[b.t].age<=S.age&&afford(UPG[b.t].cost)){pay(UPG[b.t].cost);b.lvl=1;b.hp=Math.max(b.hp,b.mhp);log('⬆ '+UPG[b.t].n+' tamamlandı.',b.x,b.y);}updPanel(true);break;}
   case 'demolish':{const b=BM.get(+v);if(b){demolish(b);UI.sel=null;}updPanel(true);break;}
  }
  buildBar();updPanel(true);

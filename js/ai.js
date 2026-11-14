@@ -235,7 +235,8 @@ function onDay(){
  // haydut döngüsü
  if(d>=S.raidAt-1&&d<S.raidAt&&S.camps.some(c=>c.alive)&&Math.random()<0.5&&d>=7)tributeDemand();
  if(d>=S.raidAt)launchRaid();
- if(d%10===0&&S.camps.filter(c=>c.alive).length<4){makeCamps(S.camps.filter(c=>c.alive).length+1);}
+ kingdomsDay();
+ if(d%10===0&&S.camps.filter(c=>c.alive).length<12){makeCamps(S.camps.filter(c=>c.alive).length+3);}
  wildDay();
  // krallar & olaylar
  kingsDay();

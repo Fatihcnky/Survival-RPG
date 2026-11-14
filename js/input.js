@@ -72,7 +72,7 @@ function onTap(px,py){
   const us=UI.sel.ids.map(id=>UM.get(id)).filter(Boolean);
   const cmdable=us.filter(u=>!S.founded||UT[u.t].mil);
   if(cmdable.length){
-   const en=unitAt(t,u=>u.team!=='p'&&u.team!=='a')||(()=>{const b=bldAt(t);return b&&b.team==='b'?b:null;})();
+   const en=unitAt(t,u=>u.team!=='p'&&u.team!=='a'&&u.team!=='f')||(()=>{const b=bldAt(t);return b&&b.team==='b'?b:null;})();
    if(en&&S.founded){cmdAttack(cmdable,en);return;}
    const mine=unitAt(t,u=>u.team==='p');
    if(!(mine&&S.founded)){cmdMove(cmdable,t.x,t.y,S.founded);return;}
@@ -81,7 +81,7 @@ function onTap(px,py){
  const u=unitAt(t,u=>u.team==='p');
  if(u){UI.sel={kind:'u',ids:[u.id]};UI.tab=null;updPanel(true);return;}
  const b=bldAt(t);
- if(b&&b.team!=='n'){UI.sel={kind:'b',id:b.id};UI.tab=null;updPanel(true);return;}
+ if(b&&b.team!=='n'&&b.team!=='f'){UI.sel={kind:'b',id:b.id};UI.tab=null;updPanel(true);return;}
  UI.sel=null;updPanel(true);
 }
 
