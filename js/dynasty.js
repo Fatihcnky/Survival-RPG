@@ -31,7 +31,7 @@ function happyFactors(){
  f.push(['Barınma',pop<=popCap()?5:-10]);
  const fd=S.res.food/Math.max(1,pop);
  f.push(['Yiyecek',fd>=8?10:fd>=3?4:fd>0.5?-4:-25]);
- if(seas()===3)f.push(['Isınma',S.res.wood>pop*2?3:-15]);
+ if(seas()===3){f.push(['Isınma',S.res.wood>pop*2?3:-15]);f.push(['Kışlık giyim',S.res.deri>=pop*0.3?3:-6]);}
  const ch=Math.min(2,countB('sapel',true)),tv=Math.min(2,countB('han',true));
  if(ch)f.push(['Şapel',8*ch]);
  if(tv)f.push(['Han',6*tv]);
@@ -49,6 +49,7 @@ function happyMul(){return 0.8+clamp(S.happy,0,100)/100*0.4;}
 function happyDay(){
  S.happy+=(happyTarget()-S.happy)*0.25;
  S.recentLoss*=0.7;
+ if(seas()===3)S.res.deri=Math.max(0,S.res.deri-popNow()*0.08);
  if(S.fest>0)S.fest--;
  if(S.dyn.festCool>0)S.dyn.festCool--;
  if(S.dyn.crisis>0&&Math.random()<0.2)S.dyn.crisis--;

@@ -3,7 +3,7 @@
 function newGame(seed){
  seed=seed||((Math.random()*1e9)|0);
  S={seed,t:0,speed:1,founded:false,age:0,rank:0,
-  res:{food:300,wood:400,stone:200,iron:0,gold:60,silah:0},
+  res:{food:300,wood:400,stone:200,iron:0,gold:60,silah:0,deri:0,alet:0,zirh:0},
   jobs:{build:1,wood:3,forage:2},story:0,nid:1,units:[],blds:[],camps:[],
   techs:{},research:null,ageProg:null,stats:{camps:0,kills:0,raids:0,lost:0},
   kings:KINGS.map(k=>({rel:{bilge:10,savasci:-10,acgozlu:0,dost:25}[k.pers],str:20,pact:null,war:false,cool:0,lastComplaint:-99,lastWar:-99})),
@@ -190,7 +190,7 @@ function sim(dt){
  econ(dt);
  for(let i=FX.length-1;i>=0;i--){FX[i].t-=dt;if(FX[i].t<=0)FX.splice(i,1);}
  accJ+=dt;
- if(accJ>=1){accJ=0;if(S.founded){balanceJobs();checkStory();checkEnd();}}
+ if(accJ>=1){accJ=0;if(S.founded&&((S.t|0)%3===0))freeTrapped();if(S.founded){balanceJobs();checkStory();checkEnd();}}
 }
 function checkStory(){
  if(S.story>=STORY.length)return;
@@ -218,7 +218,26 @@ function canPlace(t,x,y){
   const i=(y+dy)*MW+x+dx;
   if(T[i]!==0||OCC[i]!==0)return false;
  }
+ // köylüleri/yolu kapalı bir boşluğa hapsetmesin
+ if(S.founded&&!d.decor&&t!=='duvar'){
+  const inF=(px,py)=>px>=x&&px<x+d.w&&py>=y&&py<y+d.h;
+  for(let yy=y-1;yy<=y+d.h;yy++)for(let xx=x-1;xx<=x+d.w;xx++){
+   if(inF(xx,yy)||!inMap(xx,yy)||!walk(xx,yy))continue;
+   if(trappedAt(xx,yy,inF)&&!trappedAt(xx,yy))return false;
+   if(trappedAt(xx,yy,inF)&&S.units.some(u=>!u.dead&&u.team==='p'&&Math.floor(u.x)===xx&&Math.floor(u.y)===yy))return false;
+  }
+ }
  return true;
+}
+// sıkışan birimleri köyün açık alanına taşı
+function freeTrapped(){
+ const tc=mainTC();if(!tc)return;
+ for(const u of S.units){
+  if(u.dead||u.team!=='p'||u.st==='raid')continue;
+  if(!trappedAt(u.x,u.y)&&walk(Math.floor(u.x),Math.floor(u.y)))continue;
+  if(Math.hypot(u.x-tc.x,u.y-tc.y)>40)continue;
+  const p=spawnPos(tc);u.x=p.x;u.y=p.y;u.path=null;u.st='idle';u.wait=0.3;
+ }
 }
 function placeReason(t){
  const d=BT[t];
@@ -295,7 +314,7 @@ function loadGame(){
   const d=JSON.parse(raw);
   const S2=JSON.parse(d.s);
   if(d.T.length!==NN||!S2.dyn)return false;
-  S=S2;
+  S=S2;RES.forEach(k=>{if(S.res[k]==null)S.res[k]=0;});
   T=Uint8Array.from(d.T.split('').map(Number));
   RA=Float32Array.from(d.RA.split(',').map(Number));
   ROAD=Uint8Array.from(d.R.split('').map(Number));

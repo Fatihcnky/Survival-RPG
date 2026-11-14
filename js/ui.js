@@ -188,7 +188,7 @@ function updPanel(force){
 function updHud(){
  const cap=storeCap();
  let h='';
- if(S.founded)RES.forEach(k=>{h+='<span>'+RI[k]+Math.floor(S.res[k])+(k==='silah'?'':'/'+cap)+'</span>';});
+ if(S.founded)RES.forEach(k=>{h+='<span>'+RI[k]+Math.floor(S.res[k])+(NOCAP[k]?'':'/'+cap)+'</span>';});
  else h+='<span>🍖'+Math.floor(S.res.food)+'</span><span>🌲'+Math.floor(S.res.wood)+'</span><span>🧱'+Math.floor(S.res.stone)+'</span><span>💰'+Math.floor(S.res.gold)+'</span>';
  h+='<br><span>👥 '+popNow()+'/'+popCap()+'</span><span>🙂'+Math.round(S.happy)+'</span><span>📅 '+dayText()+'</span><span>'+AGES[S.age]+' · '+RANKS[S.rank]+'</span>';
  if(S.epi)h+='<span>🤒</span>';

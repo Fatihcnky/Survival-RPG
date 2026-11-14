@@ -27,6 +27,23 @@ function walk(x,y){
  const i=y*MW+x,t=T[i];
  return t!==1&&!(t>=3&&t<=5)&&OCC[i]===0;
 }
+// --- sıkışma kontrolü: küçük kapalı boşlukta mı? (dolgu ile en çok 90 kare) ---
+const tpS=new Int32Array(NN);let tpStamp=0;const tpQ=new Int32Array(120);
+function trappedAt(x,y,extra){
+ x=Math.floor(x);y=Math.floor(y);if(!inMap(x,y))return false;
+ tpStamp++;let h=0,t=0,n=0;const st=y*MW+x;tpQ[t++]=st;tpS[st]=tpStamp;
+ while(h<t){
+  const c=tpQ[h++];if(++n>=90)return false;
+  const cx=c%MW,cy=(c/MW)|0;
+  for(let d=0;d<4;d++){
+   const nx=cx+DX[d],ny=cy+DY[d];if(!inMap(nx,ny))continue;
+   const ni=ny*MW+nx;if(tpS[ni]===tpStamp)continue;
+   if(!walk(nx,ny)||(extra&&extra(nx,ny)))continue;
+   tpS[ni]=tpStamp;if(t<119)tpQ[t++]=ni;
+  }
+ }
+ return true;
+}
 function getEnt(id){return UM.get(id)||BM.get(id);}
 function dEnt(u,e){
  if(e.w){const dx=Math.max(e.x-u.x,0,u.x-(e.x+e.w)),dy=Math.max(e.y-u.y,0,u.y-(e.y+e.h));return Math.hypot(dx,dy);}

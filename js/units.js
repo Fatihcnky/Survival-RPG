@@ -14,8 +14,9 @@ function popCap(){let n=0;for(const b of S.blds)if(b.team==='p'&&b.done)n+=BT[b.
 
 // ---------- köylü ----------
 function gatherRate(j){
+ const tool=S.res.alet>=0.2?1.25:1;
  if(j==='forage')return 0.9*fxm('forage')*FORAGES[seas()]*happyMul();
- return 0.9*fxm('gather')*(seas()===3?0.8:1)*happyMul();
+ return 0.9*fxm('gather')*tool*(seas()===3?0.8:1)*happyMul();
 }
 function findRes(j,x,y){
  const ty=JOBRES[j][0];let best=-1,bd=1e9;
@@ -86,9 +87,16 @@ function workTick(u,dt){
  const j=u.job,s=seas();
  const hm=happyMul();
  if(j==='farm')addRes('food',0.10*dt*FARMS[s]*fxm('farm')*(S.drought>0?0.5:1)*hm);
- else if(j==='herd')addRes('food',0.065*dt*HERDS[s]*hm);
+ else if(j==='herd'){addRes('food',0.065*dt*HERDS[s]*hm);addRes('deri',0.012*dt*hm);}
  else if(j==='trade')addRes('gold',0.07*dt*fxm('trade')*(1+0.25*pactCount())*hm);
- else if(j==='smith'){u.tm+=dt;if(u.tm>=12){if(S.res.iron>=2&&S.res.wood>=2){S.res.iron-=2;S.res.wood-=2;addRes('silah',1);u.tm=0;}else u.tm=11;}}
+ else if(j==='smith'){u.tm+=dt;if(u.tm>=12){
+  const R=S.res;
+  const rec=[()=>R.alet<6&&R.iron>=1&&R.wood>=1&&(R.iron-=1,R.wood-=1,addRes('alet',2),1),
+   ()=>R.zirh<4&&R.iron>=2&&R.deri>=2&&(R.iron-=2,R.deri-=2,addRes('zirh',1),1),
+   ()=>R.iron>=2&&R.wood>=2&&(R.iron-=2,R.wood-=2,addRes('silah',1),1)];
+  let ok=false;
+  for(let k=0;k<3&&!ok;k++){const i=((u.rc||0)+k)%3;if(rec[i]()){ok=true;u.rc=i+1;}}
+  u.tm=ok?0:11;}}
  else if(j==='hunt'){u.fs-=dt;if(u.fs<=0){u.fs=2;const pr=findPrey(b,u);if(pr){u.pr=pr.id;u.st='hunt';u.path=null;u.cd=0;u.rp=0;}}}
  else if(j==='fire'){
   u.fs-=dt;
@@ -121,7 +129,7 @@ function updVillager(u,dt){
    if(u.carry>=9.99||RA[i]<=0){if(u.carry>0.5)toDrop(u);else u.st='idle';}
    break;}
   case 'toDrop':
-   if(walkTo(u,dt)){const rk=u.job==='hunt'?'food':(JOBRES[u.job]&&JOBRES[u.job][1]);if(u.carry>0&&rk)addRes(rk,u.carry);if(u.job==='hunt')S.stats.hunted=(S.stats.hunted||0)+1;u.carry=0;u.st='idle';}
+   if(walkTo(u,dt)){const rk=u.job==='hunt'?'food':(JOBRES[u.job]&&JOBRES[u.job][1]);if(u.carry>0&&rk){addRes(rk,u.carry);if(S.res.alet>0)S.res.alet=Math.max(0,S.res.alet-0.12);}if(u.job==='hunt'&&u.carry>0)addRes('deri',1);if(u.job==='hunt')S.stats.hunted=(S.stats.hunted||0)+1;u.carry=0;u.st='idle';}
    break;
   case 'toWork':if(walkTo(u,dt))u.st='work';break;
   case 'work':workTick(u,dt);break;

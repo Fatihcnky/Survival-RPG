@@ -5,9 +5,10 @@ const SEASONS=['İlkbahar','Yaz','Sonbahar','Kış'];
 const AGES=['Taş Çağı','Bronz Çağı','Demir Çağı','Orta Çağ','Barut Çağı'];
 const RANKS=['Köy','Kale','Şehir','Lordluk','Krallık'];
 const TITLES=['Köy Muhtarı','Kale Beyi','Şehir Başkanı','Lord','Kral'];
-const RES=['food','wood','stone','iron','gold','silah'];
-const RN={food:'Yiyecek',wood:'Odun',stone:'Taş',iron:'Demir',gold:'Altın',silah:'Silah'};
-const RI={food:'🍖',wood:'🌲',stone:'🧱',iron:'🔩',gold:'💰',silah:'🗡'};
+const RES=['food','wood','stone','iron','gold','silah','deri','alet','zirh'];
+const NOCAP={silah:1,deri:1,alet:1,zirh:1};
+const RN={food:'Yiyecek',wood:'Odun',stone:'Taş',iron:'Demir',gold:'Altın',silah:'Silah',deri:'Deri',alet:'Alet',zirh:'Zırh'};
+const RI={food:'🍖',wood:'🌲',stone:'🧱',iron:'🔩',gold:'💰',silah:'🗡',deri:'🧥',alet:'🔨',zirh:'🛡'};
 
 const JOBS=[
  {id:'build',n:'İnşaatçı',ic:'🔨',d:'Yeni binaları inşa eder.'},
@@ -18,7 +19,7 @@ const JOBS=[
  {id:'forage',n:'Toplayıcı',ic:'🍓',d:'Yabani meyve toplar.'},
  {id:'farm',n:'Çiftçi',ic:'🌾',bt:'ciftlik',d:'Çiftlikte çalışır (çiftlik başına 3).'},
  {id:'herd',n:'Çoban',ic:'🐑',bt:'agil',d:'Ağılda hayvan bakar (ağıl başına 3).'},
- {id:'smith',n:'Silahçı',ic:'⚒',bt:'demirci',d:'Demir+odundan silah yapar.'},
+ {id:'smith',n:'Silahçı',ic:'⚒',bt:'demirci',d:'Alet (demir+odun), zırh (demir+deri) ve silah (demir+odun) üretir. Aletler toplama hızını, zırh kılıçlı/şövalye eğitimini destekler.'},
  {id:'fire',n:'İtfaiyeci',ic:'🚒',bt:'itfaiye',d:'Yangınları söndürür.'},
  {id:'doc',n:'Şifacı',ic:'💊',bt:'hastane',d:'Yaralıları iyileştirir, salgını azaltır.'},
  {id:'trade',n:'Tüccar',ic:'💱',bt:'pazar',d:'Pazarda altın kazandırır.'},
@@ -65,10 +66,10 @@ const BCAT=[
 const UT={
  koylu:{n:'Köylü',g:'🧑',hp:30,atk:3,rng:1.2,rof:1.2,spd:2.0,arm:0,cost:{food:40},time:8,age:0},
  mizrakli:{n:'Mızraklı',g:'🔱',hp:60,atk:7,rng:1.4,rof:1.0,spd:2.2,arm:1,cost:{food:50,wood:25},time:12,age:0,mil:1,antiCav:2.5},
- kilic:{n:'Kılıçlı',g:'🗡',hp:80,atk:10,rng:1.3,rof:1.1,spd:2.2,arm:2,cost:{food:60,iron:25,silah:1},time:14,age:2,mil:1},
+ kilic:{n:'Kılıçlı',g:'🗡',hp:80,atk:10,rng:1.3,rof:1.1,spd:2.2,arm:2,cost:{food:60,iron:25,silah:1,zirh:1},time:14,age:2,mil:1},
  okcu:{n:'Okçu',g:'🏹',hp:38,atk:7,rng:6,rof:1.4,spd:2.2,arm:0,cost:{food:40,wood:40},time:12,age:0,mil:1,ranged:1},
  atliokcu:{n:'Atlı Okçu',g:'🏇',hp:55,atk:7,rng:5.5,rof:1.3,spd:3.8,arm:0,cost:{food:60,gold:40},time:16,age:2,mil:1,ranged:1,cav:1},
- atli:{n:'Atlı Şövalye',g:'🐎',hp:110,atk:12,rng:1.4,rof:1.1,spd:3.6,arm:2,cost:{food:80,iron:40,gold:20,silah:1},time:18,age:2,mil:1,cav:1},
+ atli:{n:'Atlı Şövalye',g:'🐎',hp:110,atk:12,rng:1.4,rof:1.1,spd:3.6,arm:2,cost:{food:80,iron:40,gold:20,silah:1,zirh:1},time:18,age:2,mil:1,cav:1},
  top:{n:'Top',g:'💣',hp:90,atk:50,rng:8,rof:4,spd:1.2,arm:0,cost:{wood:150,iron:100,gold:60,silah:3},time:30,age:4,mil:1,ranged:1,siege:1},
  haydut:{n:'Haydut',g:'🗡',hp:55,atk:8,rng:1.3,rof:1.1,spd:2.2,arm:1},
  haydutokcu:{n:'Haydut Okçu',g:'🏹',hp:35,atk:6,rng:5.5,rof:1.5,spd:2.2,arm:0,ranged:1},
