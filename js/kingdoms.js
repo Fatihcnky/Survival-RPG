@@ -14,6 +14,15 @@ function kFind(i,w,h){
  }
  return null;
 }
+function kWall(i){
+ const k=KINGS[i],h=15,x0=k.x-h,x1=k.x+h,y0=k.y-h,y1=k.y+h;
+ for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++){
+  if(x!==x0&&x!==x1&&y!==y0&&y!==y1)continue;
+  if((Math.abs(x-k.x)<=1&&(y===y0||y===y1))||(Math.abs(y-k.y)<=1&&(x===x0||x===x1)))continue;
+  if(inMap(x,y)&&walkRect(x,y,1,1))mkB('fduvar','f',x,y,true,{kid:i});
+ }
+ for(const [tx,ty] of [[x0+1,y0+1],[x1-2,y0+1],[x0+1,y1-2],[x1-2,y1-2]])if(walkRect(tx,ty,2,2))mkB('fkule','f',tx,ty,true,{kid:i});
+}
 function kBuild(i,t){
  const p=kFind(i,BT[t].w,BT[t].h);if(!p)return null;
  const b=mkB(t,'f',p.x,p.y,true,{kid:i});
@@ -121,8 +130,10 @@ function kingdomsDay(){
   else if(kd.lvl>=1&&!nk&&kd.wood>=120&&kd.stone>=60){if(kBuild(i,'fkisla')){kd.wood-=120;kd.stone-=60;}}
   else if(kd.lvl>=2&&!kBlds(i,'fkale').length&&kd.wood>=200&&kd.stone>=150){if(kBuild(i,'fkale')){kd.wood-=200;kd.stone-=150;}}
   kd.lvl=nh>=20?3:nh>=12?2:nh>=7?1:0;
+  if(kd.lvl>=1&&kBlds(i,'fkule').length<2+kd.lvl*2&&kd.wood>=90&&kd.stone>=80&&Math.random()<0.5){if(kBuild(i,'fkule')){kd.wood-=90;kd.stone-=80;}}
+  if(kd.lvl>=1&&!kd.walled&&kd.stone>=60){kd.walled=1;kWall(i);}
   // asker
-  const want=Math.min(22,3+Math.floor(kd.pop/3)+kd.lvl*2);
+  const want=Math.min(36,5+Math.floor(kd.pop/3)+kd.lvl*4);
   if(sol.length<want&&kd.food>40&&kd.wood>15&&Math.random()<0.7){
    kd.food-=25;kd.wood-=12;
    kSpawn(i,Math.random()<0.4?'okcu':(kd.lvl>=2&&Math.random()<0.3?'kilic':'mizrakli'));

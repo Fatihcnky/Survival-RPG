@@ -253,7 +253,7 @@ function act(a,v,w,el){
   case 'modal':{const m=UI.curModal;const b=m&&m.btns[+v];nextModalAfter(b);break;}
   case 'jump':S.cam.x=+el.dataset.x;S.cam.y=+el.dataset.y;break;
   case 'speed':S.speed=SPEEDS[(SPEEDS.indexOf(S.speed)+1)%SPEEDS.length];buildBar();break;
-  case 'save':log(saveGame()?'💾 Oyun kaydedildi.':'⛔ Kaydedilemedi.');break;
+  case 'save':log(saveGame('ky_save')?'💾 Hızlı kayıt alındı.':'⛔ Kaydedilemedi.');break;
   case 'found':UI.place={t:'tc',x:null,y:null};{const u=S.units.find(u=>u.team==='p');if(u){UI.place.x=Math.floor(u.x)-1;UI.place.y=Math.floor(u.y)+2;}}UI.tab=null;updPanel(true);updHint();break;
   case 'selall':UI.sel={kind:'u',ids:S.units.filter(u=>u.team==='p').map(u=>u.id)};break;
   case 'place':if(v==='duvar'){UI.wall=v;UI.road=true;UI.place=null;UI.tab=null;UI.wsel=[];UI.wstack=[];UI.wlx=null;updPanel(true);updHint();break;}UI.wall=null;UI.place={t:v,x:null,y:null};UI.road=false;UI.tab=null;updPanel(true);updHint();break;

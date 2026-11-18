@@ -326,16 +326,16 @@ function cmdAttack(units,e){for(const u of units){u.tg=e.id;u.forced=1;u.st='amo
 function soldiers(){return S.units.filter(u=>u.team==='p'&&!u.dead&&UT[u.t].mil);}
 
 // ---------- kayıt ----------
-function saveGame(){
+function saveGame(key){
  try{
   const o=JSON.stringify(S,(k,v)=>k==='path'?undefined:v);
-  localStorage.setItem('ky_save',JSON.stringify({s:o,T:Array.from(T).join(''),RA:Array.from(RA,v=>Math.round(v)).join(','),R:Array.from(ROAD).join(''),F:Array.from(FOG).join('')}));
+  localStorage.setItem(key||'ky_save',JSON.stringify({s:o,T:Array.from(T).join(''),RA:Array.from(RA,v=>Math.round(v)).join(','),R:Array.from(ROAD).join(''),F:Array.from(FOG).join('')}));
   return true;
  }catch(e){return false;}
 }
-function loadGame(){
+function loadGame(key){
  try{
-  const raw=localStorage.getItem('ky_save');if(!raw)return false;
+  const raw=localStorage.getItem(key||'ky_save');if(!raw)return false;
   const d=JSON.parse(raw);
   const S2=JSON.parse(d.s);
   if(d.T.length!==NN||!S2.dyn)return false;

@@ -40,10 +40,10 @@ button.dis{opacity:.4}
 .dc{display:block;text-align:left;width:100%;margin:8px 0;padding:10px;border-radius:10px;background:#2a3a1c;border:2px solid #6b8a45;color:#fff}
 .dc b{font-size:17px}.dc small{display:block;color:#cdbb8a;margin-bottom:4px}.dc div{font-size:12.5px;line-height:1.5}
 .dc.k{border-color:#6fd16f}.dc.n{border-color:#c9a34a}.dc.z{border-color:#ff9a4a}.dc.e{border-color:#e04545}
-#modal{position:absolute;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:16px}
-#modal .box{background:#1d2616;border:2px solid #7a9a5a;border-radius:12px;padding:14px;max-width:420px;width:100%}
+#modal{z-index:40;position:absolute;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:16px}
+#modal .box{max-height:92%;display:flex;flex-direction:column;background:#1d2616;border:2px solid #7a9a5a;border-radius:12px;padding:14px;max-width:420px;width:100%}
 #modal h3{margin:0 0 8px}
-#modal p{margin:0 0 12px;font-size:14px;line-height:1.45}
+#modal p{overflow:auto;margin:0 0 12px;font-size:14px;line-height:1.45}
 #mbtn{display:flex;gap:8px;flex-wrap:wrap}
 
 #top{padding:3px 6px;background:linear-gradient(#2a1e12ee,#1a120aee);border-bottom:2px solid #8a6a3a;font-size:13px}
@@ -58,7 +58,7 @@ button.dis{opacity:.4}
 #quest .qw{margin-top:3px;padding-top:3px;border-top:1px dashed #8a6a3a;color:#cfe8ff}
 #log{top:130px;max-width:54%}
 #top .chip{pointer-events:auto;cursor:pointer}
-.flow{display:flex;flex-direction:column;gap:2px}.fr{display:grid;grid-template-columns:1.5fr .9fr .8fr .8fr .8fr 1.3fr;gap:4px;font-size:12px;background:#0006;border-radius:8px;padding:4px 6px;align-items:center}.fr.fh{background:none;color:#ffd88a;font-size:11px}
+.flow{display:flex;flex-direction:column;gap:2px}.fr{display:grid;grid-template-columns:1.6fr 1fr 1.3fr;gap:4px;font-size:12px;background:#0006;border-radius:8px;padding:4px 6px;align-items:center}.fr.fh{background:none;color:#ffd88a;font-size:11px}
 .fr .pos,.fr .ok{color:#9be59b}.fr .neg,.fr .bad{color:#ff9a9a}.fr .warn{color:#ffd070}
 #setup{position:absolute;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:10px;z-index:20;overflow:auto}
 #setup .box{background:#1d2616;border:2px solid #c9a34a;border-radius:12px;padding:12px;max-width:460px;width:100%;max-height:100%;overflow:auto}
@@ -125,6 +125,7 @@ button.tb span{font-size:19px;line-height:1.1}button.tb.on{background:linear-gra
 <script src="js/story.js"></script>
 <script src="js/setup.js"></script>
 <script src="js/menu.js"></script>
+<script src="js/slots.js"></script>
 <script src="js/militia.js"></script>
 <script src="js/food.js"></script>
 <script src="js/testmode.js"></script>

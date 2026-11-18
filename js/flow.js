@@ -10,23 +10,23 @@ function flowOf(k){const r=FLR[k]||[];let i=0,o=0,s=0;r.forEach(x=>{i+=x[0];o+=x
  const _pay=pay;pay=function(c){FLSPEND=true;try{_pay(c);}finally{FLSPEND=false;}};
  const _sell=sellRes;sellRes=function(k,n){FLSPEND=true;try{return _sell(k,n);}finally{FLSPEND=false;}};
  const _ng=newGame;newGame=function(a,b,c){const r=_ng(a,b,c);trackRes();return r;};
- const _lg=loadGame;loadGame=function(){const r=_lg();if(r)trackRes();return r;};
+ const _lg=loadGame;loadGame=function(k){const r=_lg(k);if(r)trackRes();return r;};
 })();
 function fnum(v){const r=Math.round(v*10)/10;return (r>0?'+':'')+r;}
 function pRes(){
  const cap=storeCap();
- let h='<h4>📊 Kaynak akışı <small>(günlük, son 1 günün ortalaması)</small></h4><div class="flow">';
- h+='<div class="fr fh"><span>Kaynak</span><span>Stok</span><span>Üretim</span><span>Tüketim</span><span>Harcama</span><span>Genel durum</span></div>';
+ let h='<h4>📦 Kaynaklar <small>(günlük değişim)</small></h4><div class="flow">';
+ h+='<div class="fr fh"><span>Kaynak</span><span>Stok</span><span>Günlük</span></div>';
  RES.forEach(k=>{
   const f=flowOf(k),st=Math.floor(S.res[k]||0),net=f.net;
   let state,cls;
   if(f.i===0&&f.o===0&&f.s===0){state='—';cls='';}
-  else if(net>=0.5){state='✅ '+fnum(net);cls='ok';}
-  else if(net>-0.5){state='⚖ '+fnum(net);cls='';}
-  else{const days=st/-net;state='⚠ '+fnum(net)+' <small>('+(days<99?Math.ceil(days)+' gün':'∞')+')</small>';cls=days<SL[3]?'bad':'warn';}
-  h+='<div class="fr"><span>'+RI[k]+' '+RN[k]+'</span><span>'+st+(NOCAP[k]?'':'<small>/'+cap+'</small>')+'</span><span class="pos">'+(f.i?'+'+Math.round(f.i*10)/10:'0')+'</span><span class="neg">'+(f.o?'−'+Math.round(f.o*10)/10:'0')+'</span><span class="neg">'+(f.s?'−'+Math.round(f.s*10)/10:'0')+'</span><span class="'+cls+'">'+state+'</span></div>';
+  else if(net>=0.5){state='▲ '+fnum(net);cls='ok';}
+  else if(net>-0.5){state='● '+fnum(net);cls='';}
+  else{const days=st/-net;state='▼ '+fnum(net)+(days<99?' <small>('+Math.ceil(days)+' gün)</small>':'');cls=days<SL[3]?'bad':'warn';}
+  h+='<div class="fr"><span>'+RI[k]+' '+RN[k]+'</span><span>'+st+(NOCAP[k]?'':'<small>/'+cap+'</small>')+'</span><span class="'+cls+'">'+state+'</span></div>';
  });
- h+='</div><small>Üretim: toplanan/üretilen · Tüketim: halkın yemesi, ısınma, atölye girdileri · Harcama: yapı, eğitim, araştırma, pazar satışı. Genel durum = üretim − tüketim.</small>';
+ h+='</div>'+(typeof foodPanel==='function'?foodPanel():'');
  const w=winterNeed();
  h+='<h4>❄ Kış hazırlığı</h4><small>'+SL[3]+' günlük kış için ≈ 🌲'+w.wood+' odun, 🍖'+w.food+' yiyecek gerekir. Şu an: 🌲'+Math.floor(S.res.wood)+' / 🍖'+Math.floor(S.res.food)+'.</small>';
  return h;

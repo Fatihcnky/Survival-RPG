@@ -1,14 +1,14 @@
 'use strict';
 // ===== ANA MENÜ, ZORLUK SEÇİMİ =====
 let MENUCB=null;
-function saveInfo(){
+function saveInfo(key){
  try{
-  const raw=localStorage.getItem('ky_save');if(!raw)return null;
+  const raw=localStorage.getItem(key||'ky_save');if(!raw)return null;
   const d=JSON.parse(raw),o=JSON.parse(d.s);if(!o.dyn)return null;
   const df=DIFFS[o.diff||'normal'];
   const yd=df.sl[0]+df.sl[1]+df.sl[2]+df.sl[3];
   const day=Math.floor((o.t||0)/DAY);
-  return {txt:o.dyn.ruler.name+' · '+AGES[o.age||0]+' · '+RANKS[o.rank||0]+' · Yıl '+(Math.floor(day/yd)+1),diff:df.n};
+  return {txt:o.dyn.ruler.name+' · '+AGES[o.age||0]+' · '+RANKS[o.rank||0]+' · Yıl '+(Math.floor(day/yd)+1)+' · Gün '+(day%yd+1),diff:df.n};
  }catch(e){return null;}
 }
 function showMenu(loaded,start){

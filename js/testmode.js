@@ -15,7 +15,7 @@ function applyTest(){
 {const _ec=econ;econ=function(dt){_ec(dt);if(S&&S.test)RES.forEach(k=>{if(S.res[k]<50000)S.res[k]=99999;});};}
 {const _sm=showMenu;showMenu=function(l,st){_sm(l,st);const b=$('menuBtns');if(b&&!b.querySelector('[data-a=mtest]'))b.insertAdjacentHTML('beforeend','<button class="mb2" data-a="mtest">🧪 Test Modu<small>Her şey açık, sınırsız kaynak (geçici)</small></button>');};}
 {const _a=act;act=function(a,v,w,el){
- if(a==='mtest'){window.TESTMODE=1;$('menu').style.display='none';try{localStorage.removeItem('ky_save');}catch(e){}MENUCB(false);
+ if(a==='mtest'){window.TESTMODE=1;$('menu').style.display='none';MENUCB(false);
   setTimeout(()=>{if($('diffscr').style.display!=='none'){$('diffscr').style.display='none';if(showDiff.cb)showDiff.cb('kolay');}},60);return;}
  if(a==='mnew'||a==='mcont')window.TESTMODE=0;
  return _a(a,v,w,el);};}

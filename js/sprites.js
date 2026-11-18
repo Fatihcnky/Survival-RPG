@@ -116,9 +116,10 @@ drawUnit=function(u){
 };
 
 // ===== ÇİT / KAPI: komşulara göre yön seçimi =====
+let WALLTEAM='p';
 function wallAt(x,y){
  if(!inMap(x,y))return false;const id=OCC[y*MW+x];if(!id)return false;
- const o=BM.get(id);return !!(o&&(o.t==='duvar'||o.t==='kapi')&&o.team==='p');
+ const o=BM.get(id);return !!(o&&(o.t==='duvar'||o.t==='kapi'||o.t==='bduvar'||o.t==='fduvar')&&o.team===WALLTEAM);
 }
 function drawWallV(x,y,U,D,L,R,hasH){
  const x0=x+0.29,w=0.42,y0=y-0.82,y1=y+0.18;
@@ -172,11 +173,11 @@ function drawAgil(b){
 }
 drawBuilding=function(b){
  if(b.t==='agil'){drawAgil(b);if(b.pri&&!b.done)ctx.drawImage(spr('⭐'),b.x+b.w-0.5,b.y,0.5,0.5);return;}
- if(b.t!=='duvar'&&b.t!=='kapi'){_drawBuildingOld(b);
+ if(b.t!=='duvar'&&b.t!=='kapi'&&b.t!=='bduvar'&&b.t!=='fduvar'){_drawBuildingOld(b);
   if(b.done&&b.team==='p'&&PROPS[b.t])PROPS[b.t].forEach(([n,fx,fy])=>drawProp(n,b.x+b.w*fx,b.y+b.h*fy,1/26));
   if(b.lvl&&b.team==='p')ctx.drawImage(spr('⭐'),b.x+b.w-(b.w>=2?0.5:0.4),b.y+(b.w>=2?0.5:0.05),0.4,0.4);
   if(b.pri&&!b.done)ctx.drawImage(spr('⭐'),b.x+b.w-0.5,b.y,0.5,0.5);return;}
- const x=b.x,y=b.y,L=wallAt(x-1,y),R=wallAt(x+1,y),U=wallAt(x,y-1),D=wallAt(x,y+1);
+ WALLTEAM=b.team;const x=b.x,y=b.y,L=wallAt(x-1,y),R=wallAt(x+1,y),U=wallAt(x,y-1),D=wallAt(x,y+1);
  let tags=[];
  if(L||R)tags.push('h');
  if(U||D){if(b.t==='kapi'&&tags.length===0)tags.push('v');else if(b.t!=='kapi')tags.push('v');}
@@ -186,12 +187,15 @@ drawBuilding=function(b){
  }
  ctx.globalAlpha=b.done?1:0.5;
  const hasH=tags.includes('h'),hasV=tags.includes('v');
- if(b.t==='duvar'&&hasV)drawWallV(x,y,U,D,L,R,hasH);
+ if(hasV&&(b.t!=='kapi'||!hasH)){drawWallV(x,y,U,D,L,R,hasH);
+  if(b.t==='kapi'){const gx=x+0.34,gw=0.32,gy=y-0.5,gh=0.68;ctx.fillStyle='#2a1a0c';ctx.fillRect(gx-0.03,gy-0.03,gw+0.06,gh+0.03);
+   ctx.fillStyle='#7a4a22';ctx.fillRect(gx,gy,gw,gh);ctx.fillStyle='#5a3416';for(let k=1;k<3;k++)ctx.fillRect(gx+k*gw/3-0.01,gy,0.02,gh);
+   ctx.fillStyle='#3a3f44';ctx.fillRect(gx,gy+0.18,gw,0.04);ctx.fillRect(gx,gy+0.46,gw,0.04);ctx.fillStyle='#ffd23c';ctx.fillRect(gx+gw-0.07,gy+0.32,0.04,0.04);}}
  for(const tg of tags){
-  const im=img('s_'+b.t+'_'+tg);
-  if(b.t==='duvar'&&tg==='v')continue;
+  const im=img('s_'+(b.t==='kapi'?'kapi':'duvar')+'_'+tg);
+  if(tg==='v'&&(b.t!=='kapi'||!hasH))continue;
   if(im&&tg==='v')ctx.drawImage(im,x+0.5-SURW/2,y,SURW,1.0);
-  else if(im&&tg==='h'&&hasV&&b.t==='duvar'&&!(L&&R)){ // köşe: kolu yarıya kırp, çıkıntı kalmasın
+  else if(im&&tg==='h'&&hasV&&b.t!=='kapi'&&!(L&&R)){ // köşe: kolu yarıya kırp, çıkıntı kalmasın
    ctx.save();ctx.beginPath();if(L)ctx.rect(x-0.6,y-2,0.6+0.71,5);else ctx.rect(x+0.29,y-2,1.5,5);ctx.clip();
    ctx.drawImage(im,x+0.5-SURW/2,y+0.95-SURH,SURW,SURH);ctx.restore();}
   else if(im)ctx.drawImage(im,x+0.5-SURW/2,y+0.95-SURH,SURW,SURH);

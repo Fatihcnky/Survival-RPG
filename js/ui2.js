@@ -32,7 +32,7 @@ function updHud(){
  let h='<div class="row1">';
  if(S.founded)RES.forEach(k=>{if(HIDE0[k]&&S.res[k]<0.5)return;h+=chip(k);});
  else['food','wood','stone','gold'].forEach(k=>{h+=chip(k);});
- h+='</div><div class="row2">';
+ h+='</div>'+(S.founded&&S.fv?foodRow():'')+'<div class="row2">';
  const td=(S.t%DAY)/DAY,night=td>0.78||td<0.06,hp=Math.round(S.happy);
  h+='<span class="chip">👥<b>'+popNow()+'/'+popCap()+'</b></span>';
  h+='<span class="chip">'+(hp>=65?'😄':hp>=40?'🙂':hp>=20?'😟':'😡')+'<b>'+hp+'</b></span>';
@@ -62,7 +62,7 @@ function buildBar(){
  else{
   h+=tb('🔨','Yapı','tab','build')+tb('👥','Halk','tab','people')+tb('⚔','Ordu','tab','army')+tb('🔬','Araştır','tab','tech')+tb('📈','İlerleme','tab','prog')+tb('👑','Hanedan','tab','dyn')+tb('🕊','Diplomasi','tab','dip')+tb('💱','Pazar','tab','mkt')+tb('📜','Görev','tab','quest')+tb('🛣','Yol','road');
  }
- h+=tb('⏩','x'+S.speed,'speed')+tb(AUD&&AUD.muted?'🔇':'🔊','Ses','mute')+tb('💾','Kaydet','save');
+ h+=tb('⏩','x'+S.speed,'speed')+tb(AUD&&AUD.muted?'🔇':'🔊','Ses','mute')+tb('💾','Hızlı Kayıt','save')+tb('☰','Menü','igmenu');
  $('bar').innerHTML=h;
 }
 
@@ -137,7 +137,7 @@ function armyBar(){
  const us=UI.sel&&UI.sel.kind==='u'?UI.sel.ids.map(id=>UM.get(id)).filter(Boolean):[];
  if(us.length&&!panelOpen){
   const mil=us.filter(u=>UT[u.t].mil);
-  h+='<span class="sbn">'+(us.length===1?UT[us[0].t].g+' '+UT[us[0].t].n+' ❤'+Math.ceil(us[0].hp):'✅ '+us.length+' birim seçili')+'</span>';
+  h+='<span class="sbn">'+(us.length===1?UT[us[0].t].g+' '+UT[us[0].t].n+(us[0].job?' ('+JOBNAME(us[0].job)+')':'')+' ❤'+Math.ceil(us[0].hp):'✅ '+us.length+' birim seçili')+'</span>';
   if(mil.length){h+=btn('🛑 Dur','hold')+btn('🏠 Geri çek','retreat')+btn('≡ Aynı tip','seltype',us[0].t);}
   h+=btn('⚔ Tüm ordu','selarmy')+btn('✖','desel');
  }else if(sd.length){

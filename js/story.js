@@ -19,22 +19,42 @@ function spawnFortress(){
  const st=S.start;
  const cands=[[22,22],[MW-27,22],[22,MH-27],[MW-27,MH-27]].map(([x,y])=>({x,y,d:Math.hypot(x-st.x,y-st.y)})).sort((a,b)=>b.d-a.d);
  for(const c of cands){
-  for(let dy=-4;dy<=8;dy++)for(let dx=-4;dx<=8;dx++){const X=c.x+dx,Y=c.y+dy;if(inMap(X,Y)&&OCC[Y*MW+X]===0&&T[Y*MW+X]!==0){T[Y*MW+X]=0;RA[Y*MW+X]=0;}}
+  for(let dy=-6;dy<=12;dy++)for(let dx=-6;dx<=9;dx++){const X=c.x+dx,Y=c.y+dy;if(inMap(X,Y)&&OCC[Y*MW+X]===0&&T[Y*MW+X]!==0){T[Y*MW+X]=0;RA[Y*MW+X]=0;}}
   if(!walkRect(c.x,c.y,4,4))continue;
   const b=mkB('karakale','b',c.x,c.y,true);
   S.sf.fort={x:c.x,y:c.y,id:b.id};
-  const mk=(t,n,r)=>{for(let k=0;k<n;k++){const u=mkUnit(t,'b',c.x+0.5+(k%5)*0.9-1.5,c.y+5.2+r+(k/5|0)*0.9,{guard:1,hx:c.x+2,hy:c.y+6,st:'idle'});u.hp=u.mhp=Math.round(u.mhp*1.5);}};
-  mk('haydutreis',8,0);mk('haydutokcu',6,1.5);mk('haydutatli',3,3);
+  const mk=(t,n,r)=>{for(let k=0;k<n;k++){const u=mkUnit(t,'b',c.x+0.5+(k%5)*0.9-1.5,c.y+5.2+r+(k/5|0)*0.9,{guard:1,hx:c.x+2,hy:c.y+6,st:'idle'});u.hp=u.mhp=Math.round(u.mhp*2.6);u.ds=2.2;}};
+  fortRing(c);S.sf.nextAtk=S.day+10;
+  mk('haydutreis',10,0);mk('haydutokcu',8,1.5);mk('haydutatli',5,3);
   revealC(c.x+2,c.y+2,10);
   return true;
  }
  return false;
 }
+function fortRing(c){
+ const x0=c.x-4,x1=c.x+7,y0=c.y-4,y1=c.y+10,mx=c.x+1;
+ const tw=[[x0,y0],[x1-1,y0],[x0,y1-1],[x1-1,y1-1],[mx-3,y1-1],[mx+3,y1-1]];
+ for(const [tx,ty] of tw)if(walkRect(tx,ty,2,2)){const t=mkB('bkule','b',tx,ty,true);t.ds=1.25;}
+ for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++){
+  if(x!==x0&&x!==x1&&y!==y0&&y!==y1)continue;
+  if((x===mx||x===mx+1)&&(y===y0||y===y1))continue;
+  if((y===c.y+3||y===c.y+4)&&(x===x0||x===x1))continue;
+  if(walkRect(x,y,1,1))mkB('bduvar','b',x,y,true);
+ }
+}
+function fortAttack(f){
+ const tc=mainTC();if(!tc)return;
+ const n=clamp(6+Math.floor(S.day/12)+S.rank*2,8,36);
+ for(let i=0;i<n;i++){const t=i%5===0?'haydutatli':i%2?'haydutokcu':'haydutreis';
+  const u=mkUnit(t,'b',f.x+1+(i%6)*0.7,f.y+11.5+(i/6|0)*0.7,{st:'raid',gt:tc.id});u.hp=u.mhp=Math.round(u.mhp*2.2);u.ds=1.9;}
+ log('⚔ MALDRİC SEFERE ÇIKTI! Kara Kale\'den '+n+' elit savaşçı köyüne yürüyor.',f.x,f.y);
+}
 function fortDay(){
  const f=S.sf&&S.sf.fort;if(!f||S.sf.maldricDead)return;
  const b=BM.get(f.id);if(!b)return;
  const g=S.units.filter(u=>u.team==='b'&&!u.dead&&Math.hypot(u.x-f.x,u.y-f.y)<14).length;
- if(g<14&&S.day%3===0)for(let k=0;k<2;k++){const u=mkUnit(k?'haydutokcu':'haydutreis','b',f.x+1+k,f.y+5,{guard:1,hx:f.x+2,hy:f.y+6,st:'idle'});u.hp=u.mhp=Math.round(u.mhp*1.5);}
+ if(g<20&&S.day%3===0)for(let k=0;k<2;k++){const u=mkUnit(k?'haydutokcu':'haydutreis','b',f.x+1+k,f.y+5,{guard:1,hx:f.x+2,hy:f.y+6,st:'idle'});u.hp=u.mhp=Math.round(u.mhp*2.6);u.ds=2.2;}
+ if(S.day>=(S.sf.nextAtk||0)&&S.rank>=3){S.sf.nextAtk=S.day+Math.max(7,13-Math.floor(S.rank*1.5));fortAttack(f);}
 }
 function storyCheck(){
  if(S&&S.founded&&S.rank>=3&&!(S.sf&&S.sf.fort))spawnFortress();

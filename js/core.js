@@ -113,7 +113,7 @@ function nearestEnemy(u,r,unitsOnly){
 function mkUnit(t,team,x,y,extra){
  const d=UT[t];
  const u=Object.assign({id:S.nid++,t,team,x,y,hp:d.hp,mhp:d.hp,job:null,st:'idle',path:null,pi:0,tg:0,cd:0,carry:0,rp:0,scan:Math.random()*0.5,flee:0,wait:Math.random()*0.5,ti:-1,wb:0,sb:0,tm:0,fs:0},extra||{});
- if((team==='k'||team==='f')&&d.atk&&S.day){const m=(1+Math.min(1.3,S.day/220)+0.12*(S.rank||0))*dif().k;u.hp=u.mhp=Math.round(d.hp*m);u.ds=m;}
+ if((team==='k'||team==='f')&&d.atk&&S.day){const m=(1+Math.min(1.3,S.day/220)+0.12*(S.rank||0))*dif().k*(team==='f'?1.3:1);u.hp=u.mhp=Math.round(d.hp*m);u.ds=m;}
  S.units.push(u);UM.set(u.id,u);return u;
 }
 function fillOcc(b,v){const g=BT[b.t]&&BT[b.t].gate;for(let dy=0;dy<b.h;dy++)for(let dx=0;dx<b.w;dx++){const x=b.x+dx,y=b.y+dy;if(inMap(x,y))GATE[y*MW+x]=(v&&g)?1:0;}for(let dy=0;dy<b.h;dy++)for(let dx=0;dx<b.w;dx++){const x=b.x+dx,y=b.y+dy;if(inMap(x,y))OCC[y*MW+x]=v;}}

@@ -297,5 +297,5 @@ function onDay(){
  // krallar & olaylar
  kingsDay();
  if(d>=S.nextEvent){rollEvent();S.nextEvent=d+ri(3,5);}
- if(d%3===0)saveGame();
+ if(d%3===0)saveGame('ky_auto');
 }

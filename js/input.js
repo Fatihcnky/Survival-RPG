@@ -108,10 +108,10 @@ function onTap(px,py){
 
 // --- döngü ---
 let last=performance.now(),paused=false;
-document.addEventListener('visibilitychange',()=>{paused=document.hidden;last=performance.now();if(document.hidden&&S&&S.founded)saveGame();});
+document.addEventListener('visibilitychange',()=>{paused=document.hidden;last=performance.now();if(document.hidden&&S&&S.founded)saveGame('ky_auto');});
 function frame(now){
  let dt=Math.min(0.1,(now-last)/1000);last=now;
- if(!paused&&S&&!UI.modalOpen){
+ if(!paused&&S&&!UI.modalOpen&&!UI.menuOpen){
   let acc=dt*S.speed;
   while(acc>1e-6){const s=Math.min(acc,0.1);sim(s);acc-=s;}
  }
@@ -125,14 +125,14 @@ function frame(now){
 function boot(){
  resize();
  let loaded=false;
- try{loaded=!!localStorage.getItem('ky_save');}catch(e){}
- const start=(cont)=>{
+ loaded=true;
+ const start=(cont,key)=>{
   const go=()=>{
    clampCam();buildBar();updHint();drawMini(true);
    if(!S.founded)showModal('🏰 Aldora\'nın Mirası','Sürgündeki kafilen yeni bir yurt arıyor. Haritada gezin (sürükle, iki parmakla yakınlaştır), uygun bir yer bul ve "Köyü Kur" düğmesine bas.\n\nGörev: köyünü büyüt, haydutlara karşı koy, komşu krallarla diplomasi yap ve krallığını ilan et.',[{t:'Başla'}]);
   };
   requestAnimationFrame(frame);
-  if(cont&&loadGame())go();else newGameSetup(go);
+  if(cont&&loadGame(key))go();else newGameSetup(go);
  };
  S=null;showMenu(loaded,start);
 }
