@@ -191,6 +191,7 @@ drawBuilding=function(b){
   if(b.t==='kapi'){const gx=x+0.34,gw=0.32,gy=y-0.5,gh=0.68;ctx.fillStyle='#2a1a0c';ctx.fillRect(gx-0.03,gy-0.03,gw+0.06,gh+0.03);
    ctx.fillStyle='#7a4a22';ctx.fillRect(gx,gy,gw,gh);ctx.fillStyle='#5a3416';for(let k=1;k<3;k++)ctx.fillRect(gx+k*gw/3-0.01,gy,0.02,gh);
    ctx.fillStyle='#3a3f44';ctx.fillRect(gx,gy+0.18,gw,0.04);ctx.fillRect(gx,gy+0.46,gw,0.04);ctx.fillStyle='#ffd23c';ctx.fillRect(gx+gw-0.07,gy+0.32,0.04,0.04);}}
+if(b.t==='kapi'&&hasH&&!hasV){const wi=img('s_duvar_h');if(wi)for(const sd of [L?-1:0,R?1:0]){if(!sd)continue;ctx.save();ctx.beginPath();ctx.rect(sd<0?x-0.45:x+0.62,y-2,0.83,5);ctx.clip();ctx.drawImage(wi,x+0.5-SURW/2,y+0.95-SURH,SURW,SURH);ctx.restore();}}
  for(const tg of tags){
   const im=img('s_'+(b.t==='kapi'?'kapi':'duvar')+'_'+tg);
   if(tg==='v'&&(b.t!=='kapi'||!hasH))continue;

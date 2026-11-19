@@ -12,7 +12,7 @@ function spr(g){
 const IMGS={};
 (function(){
  const names=['e_deco05','e_deco07','e_deco13','e_deco14','t_grass1','t_grass2','t_water1','t_water2','t_snow1','t_snow2','t_road','e_tree1','e_tree2','e_tree3','e_tree4','e_stone','e_iron','e_gold','e_berry','e_fire'];
- Object.keys(BT).forEach(k=>{if(k!=='duvar'&&k!=='kapi'&&k!=='bduvar'&&k!=='fduvar'&&k!=='bkule'&&k!=='fkule')names.push('s_'+k);});['duvar','kapi'].forEach(k=>['h','v','d1','d2'].forEach(t=>names.push('s_'+k+'_'+t)));
+ Object.keys(BT).forEach(k=>{if(k!=='duvar'&&k!=='kapi'&&k!=='bduvar'&&k!=='fduvar'&&k!=='bkule'&&k!=='fkule'&&k!=='katedral')names.push('s_'+k);});['duvar','kapi'].forEach(k=>['h','v','d1','d2'].forEach(t=>names.push('s_'+k+'_'+t)));
  [1,2,3,4,7,8,9,10,13,14,15,19,20,21,23].forEach(n=>names.push('u'+String(n).padStart(2,'0')));
  names.forEach(n=>{const i=new Image();i.src='img/'+n+'.png';IMGS[n]=i;});
 })();
@@ -70,7 +70,7 @@ const SMOKE={ev:1,tc:1,han:1,demirci:1,kisla:1,firin:1};
 const LIGHT={ev:1,tc:1,han:1,kule:1,tkule:1,sapel:1,kale:1};
 function drawBuilding(b){
  const d=BT[b.t];
- const bi=img('s_'+(({bkule:'tkule',fkule:'tkule'})[b.t]||b.t));
+ const bi=img('s_'+(({bkule:'tkule',fkule:'tkule',katedral:'saray'})[b.t]||b.t));
  if(bi){
   ctx.fillStyle='#0002';ctx.beginPath();ctx.ellipse(b.x+b.w/2,b.y+b.h-0.18,b.w*0.34,0.14,0,0,6.3);ctx.fill();
   ctx.globalAlpha=b.done?1:0.5;
