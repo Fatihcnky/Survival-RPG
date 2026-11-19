@@ -87,9 +87,17 @@ function spawnCaravan(i){
  const u=mkUnit('kervan','a',sx+0.5,sy+0.5,{kid:i,st:'idle'});u.life=DAY*4;
  log('🐫 '+K.n+' kervanı sana doğru yola çıktı. Haydutlar basmadan ulaşmasını sağla!',K.x,K.y);
 }
+function tradeRoad(u){
+ if(!u.trail)return;S.trc=S.trc||{};let n=0;
+ const year=S.day>=YEARD;
+ for(const i of u.trail){S.trc[i]=(S.trc[i]||0)+1;
+  if(year&&S.trc[i]>=2&&T[i]===0&&!OCC[i]&&!ROAD[i]){ROAD[i]=2;n++;}}
+ if(n>5)log('🛤 Ticaret yolu belirginleşti ('+n+' kare yol açıldı). Yollar yürüyüşü hızlandırır.');
+}
 function updCaravan(u,dt){
  if(u.hp<u.mhp*0.5&&!u.warned){u.warned=1;log('🐫 Kervan saldırı altında! Askerlerini gönder.',u.x,u.y);}
  if(u.life!=null){u.life-=dt;if(u.life<=0){killU(u);return;}}
+ {const ti=Math.floor(u.y)*MW+Math.floor(u.x);u.trail=u.trail||[];if(u.trail[u.trail.length-1]!==ti)u.trail.push(ti);}
  const tc=mainTC();if(!tc){killU(u);return;}
  if(!u.path){
   if(u.tries>6){log('🐫 Kervan yolunu bulamadı ve geri döndü.');u.dead=1;UM.delete(u.id);return;}
@@ -99,7 +107,7 @@ function updCaravan(u,dt){
   if(Math.hypot(u.x-(tc.x+tc.w/2),u.y-(tc.y+tc.h/2))<tc.w/2+3){
    const g=Math.round((50+S.day*2)*fxm('trade')*(S.kings&&S.kings[u.kid]&&S.kings[u.kid].pact==='ittifak'?1.3:1));
    addRes('gold',g);const pk=pick(['iron','stone','keten','deri','wood']);const a=Math.round(30*fxm('trade'));addRes(pk,a);
-   S.cv=(S.cv||0)+1;if(S.kings[u.kid])adjRel(u.kid,4);
+   tradeRoad(u);S.cv=(S.cv||0)+1;if(S.kings[u.kid])adjRel(u.kid,4);
    log('🐫 Kervan ulaştı: +'+g+' altın, +'+a+' '+(RN[pk]||pk)+'.',u.x,u.y);
    u.dead=1;UM.delete(u.id);
   }

@@ -119,7 +119,22 @@ drawUnit=function(u){
 let WALLTEAM='p';
 function wallAt(x,y){
  if(!inMap(x,y))return false;const id=OCC[y*MW+x];if(!id)return false;
- const o=BM.get(id);return !!(o&&(o.t==='duvar'||o.t==='kapi'||o.t==='bduvar'||o.t==='fduvar')&&o.team===WALLTEAM);
+ const o=BM.get(id);return !!(o&&(o.t==='duvar'||o.t==='kapi'||o.t==='bduvar'||o.t==='fduvar'||o.t==='fkapi')&&o.team===WALLTEAM);
+}
+function drawGateV(x,y){
+ const cx=x+0.5,top=y-0.7,bot=y+0.2;
+ const rr=(px,py,w,h,r,c)=>{ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(px,py+h);ctx.lineTo(px,py+r);ctx.quadraticCurveTo(px,py,px+r,py);ctx.lineTo(px+w-r,py);ctx.quadraticCurveTo(px+w,py,px+w,py+r);ctx.lineTo(px+w,py+h);ctx.closePath();ctx.fill();};
+ rr(x+0.08,top-0.03,0.84,bot-top+0.06,0.3,'#3a3f44');        // dış hat
+ rr(x+0.11,top,0.78,bot-top,0.28,'#a8b5ba');                 // taş kemer gövdesi
+ rr(x+0.11,top,0.78,0.16,0.14,'#c9d3d7');                    // üst parlak taş
+ ctx.fillStyle='#8a969b';for(let k=0;k<5;k++){const a=Math.PI*(0.15+k*0.175);ctx.fillRect(cx+Math.cos(a)*0.31-0.015,top+0.2-Math.sin(a)*0.12,0.03,0.07);}
+ ctx.fillStyle='#7c868a';ctx.fillRect(x+0.77,top+0.16,0.12,bot-top-0.16);   // gölge yan
+ rr(x+0.25,top+0.27,0.5,bot-top-0.27,0.22,'#4a2418');        // kapı çerçevesi
+ rr(x+0.28,top+0.3,0.44,bot-top-0.3,0.2,'#b4553a');          // kırmızı kapı
+ ctx.fillStyle='#7a3320';ctx.fillRect(cx-0.01,top+0.32,0.02,bot-top-0.32);
+ ctx.fillStyle='#d9a08a';ctx.fillRect(x+0.31,top+0.36,0.16,0.03);ctx.fillRect(x+0.53,top+0.36,0.16,0.03);
+ ctx.fillStyle='#d9d0c0';ctx.fillRect(x+0.31,top+0.56,0.16,0.03);ctx.fillRect(x+0.53,top+0.56,0.16,0.03);
+ ctx.fillStyle='#7a3320';ctx.fillRect(x+0.31,top+0.45,0.38,0.03);ctx.fillRect(x+0.31,top+0.65,0.38,0.03);
 }
 function drawWallV(x,y,U,D,L,R,hasH){
  const x0=x+0.29,w=0.42,y0=y-0.82,y1=y+0.18;
@@ -173,30 +188,27 @@ function drawAgil(b){
 }
 drawBuilding=function(b){
  if(b.t==='agil'){drawAgil(b);if(b.pri&&!b.done)ctx.drawImage(spr('⭐'),b.x+b.w-0.5,b.y,0.5,0.5);return;}
- if(b.t!=='duvar'&&b.t!=='kapi'&&b.t!=='bduvar'&&b.t!=='fduvar'){_drawBuildingOld(b);
+ if(b.t!=='duvar'&&(b.t!=='kapi'&&b.t!=='fkapi')&&b.t!=='bduvar'&&b.t!=='fduvar'&&b.t!=='fkapi'){_drawBuildingOld(b);
   if(b.done&&b.team==='p'&&PROPS[b.t])PROPS[b.t].forEach(([n,fx,fy])=>drawProp(n,b.x+b.w*fx,b.y+b.h*fy,1/26));
   if(b.lvl&&b.team==='p')ctx.drawImage(spr('⭐'),b.x+b.w-(b.w>=2?0.5:0.4),b.y+(b.w>=2?0.5:0.05),0.4,0.4);
   if(b.pri&&!b.done)ctx.drawImage(spr('⭐'),b.x+b.w-0.5,b.y,0.5,0.5);return;}
  WALLTEAM=b.team;const x=b.x,y=b.y,L=wallAt(x-1,y),R=wallAt(x+1,y),U=wallAt(x,y-1),D=wallAt(x,y+1);
  let tags=[];
  if(L||R)tags.push('h');
- if(U||D){if(b.t==='kapi'&&tags.length===0)tags.push('v');else if(b.t!=='kapi')tags.push('v');}
+ if(U||D){if((b.t==='kapi'||b.t==='fkapi')&&tags.length===0)tags.push('v');else if((b.t!=='kapi'&&b.t!=='fkapi'))tags.push('v');}
  if(!tags.length){
   const a=wallAt(x-1,y-1),c=wallAt(x+1,y+1),e=wallAt(x+1,y-1),f=wallAt(x-1,y+1);
   if(a||c)tags.push('d1');else if(e||f)tags.push('d2');else tags.push('h');
  }
  ctx.globalAlpha=b.done?1:0.5;
  const hasH=tags.includes('h'),hasV=tags.includes('v');
- if(hasV&&(b.t!=='kapi'||!hasH)){drawWallV(x,y,U,D,L,R,hasH);
-  if(b.t==='kapi'){const gx=x+0.34,gw=0.32,gy=y-0.5,gh=0.68;ctx.fillStyle='#2a1a0c';ctx.fillRect(gx-0.03,gy-0.03,gw+0.06,gh+0.03);
-   ctx.fillStyle='#7a4a22';ctx.fillRect(gx,gy,gw,gh);ctx.fillStyle='#5a3416';for(let k=1;k<3;k++)ctx.fillRect(gx+k*gw/3-0.01,gy,0.02,gh);
-   ctx.fillStyle='#3a3f44';ctx.fillRect(gx,gy+0.18,gw,0.04);ctx.fillRect(gx,gy+0.46,gw,0.04);ctx.fillStyle='#ffd23c';ctx.fillRect(gx+gw-0.07,gy+0.32,0.04,0.04);}}
-if(b.t==='kapi'&&hasH&&!hasV){const wi=img('s_duvar_h');if(wi)for(const sd of [L?-1:0,R?1:0]){if(!sd)continue;ctx.save();ctx.beginPath();ctx.rect(sd<0?x-0.45:x+0.62,y-2,0.83,5);ctx.clip();ctx.drawImage(wi,x+0.5-SURW/2,y+0.95-SURH,SURW,SURH);ctx.restore();}}
+ if(hasV&&((b.t!=='kapi'&&b.t!=='fkapi')||!hasH)){drawWallV(x,y,U,D,L,R,hasH);
+  if((b.t==='kapi'||b.t==='fkapi'))drawGateV(x,y);}
  for(const tg of tags){
-  const im=img('s_'+(b.t==='kapi'?'kapi':'duvar')+'_'+tg);
-  if(tg==='v'&&(b.t!=='kapi'||!hasH))continue;
+  const im=img('s_'+((b.t==='kapi'||b.t==='fkapi')?'kapi':'duvar')+'_'+tg);
+  if(tg==='v'&&((b.t!=='kapi'&&b.t!=='fkapi')||!hasH))continue;
   if(im&&tg==='v')ctx.drawImage(im,x+0.5-SURW/2,y,SURW,1.0);
-  else if(im&&tg==='h'&&hasV&&b.t!=='kapi'&&!(L&&R)){ // köşe: kolu yarıya kırp, çıkıntı kalmasın
+  else if(im&&tg==='h'&&hasV&&(b.t!=='kapi'&&b.t!=='fkapi')&&!(L&&R)){ // köşe: kolu yarıya kırp, çıkıntı kalmasın
    ctx.save();ctx.beginPath();if(L)ctx.rect(x-0.6,y-2,0.6+0.71,5);else ctx.rect(x+0.29,y-2,1.5,5);ctx.clip();
    ctx.drawImage(im,x+0.5-SURW/2,y+0.95-SURH,SURW,SURH);ctx.restore();}
   else if(im)ctx.drawImage(im,x+0.5-SURW/2,y+0.95-SURH,SURW,SURH);

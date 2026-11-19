@@ -18,8 +18,8 @@ function kWall(i){
  const k=KINGS[i],h=15,x0=k.x-h,x1=k.x+h,y0=k.y-h,y1=k.y+h;
  for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++){
   if(x!==x0&&x!==x1&&y!==y0&&y!==y1)continue;
-  if((Math.abs(x-k.x)<=1&&(y===y0||y===y1))||(Math.abs(y-k.y)<=1&&(x===x0||x===x1)))continue;
-  if(inMap(x,y)&&walkRect(x,y,1,1))mkB('fduvar','f',x,y,true,{kid:i});
+  const gp=(Math.abs(x-k.x)<=1&&(y===y0||y===y1))||(Math.abs(y-k.y)<=1&&(x===x0||x===x1));
+  if(inMap(x,y)&&walkRect(x,y,1,1))mkB(gp?'fkapi':'fduvar','f',x,y,true,{kid:i});
  }
  for(const [tx,ty] of [[x0+1,y0+1],[x1-2,y0+1],[x0+1,y1-2],[x1-2,y1-2]])if(walkRect(tx,ty,2,2))mkB('fkule','f',tx,ty,true,{kid:i});
 }
@@ -131,7 +131,8 @@ function kingdomsDay(){
   else if(kd.lvl>=2&&!kBlds(i,'fkale').length&&kd.wood>=200&&kd.stone>=150){if(kBuild(i,'fkale')){kd.wood-=200;kd.stone-=150;}}
   kd.lvl=nh>=20?3:nh>=12?2:nh>=7?1:0;
   if(kd.lvl>=1&&kBlds(i,'fkule').length<2+kd.lvl*2&&kd.wood>=90&&kd.stone>=80&&Math.random()<0.5){if(kBuild(i,'fkule')){kd.wood-=90;kd.stone-=80;}}
-  if(kd.lvl>=1&&!kd.walled&&kd.stone>=60){kd.walled=1;kWall(i);}
+  if(kd.lvl>=1&&!kd.walled&&kd.stone>=60){kd.walled=1;kd.gated=1;kWall(i);}
+  if(kd.walled&&!kd.gated){kd.gated=1;kWall(i);}
   // asker
   const want=Math.min(36,5+Math.floor(kd.pop/3)+kd.lvl*4);
   if(sol.length<want&&kd.food>40&&kd.wood>15&&Math.random()<0.7){
@@ -141,16 +142,17 @@ function kingdomsDay(){
   k.str=Math.round(sol.length*3+folk.length*0.5);
   // haydut kampına sefer
   kd.campCool--;
-  if(kd.campCool<=0&&sol.length>=10&&!kd.campGoal){
-   let best=null,bd=45;
+  const near=S.camps.some(c=>c.alive&&Math.hypot(c.x-K.x,c.y-K.y)<34);
+  if(((kd.campCool<=0&&sol.length>=10)||(near&&sol.length>=5))&&!kd.campGoal){
+   let best=null,bd=near?34:45;
    for(const c of S.camps){if(!c.alive)continue;const d=Math.hypot(c.x-K.x,c.y-K.y);if(d<bd){bd=d;best=c;}}
    if(best){
-    kd.campGoal=best.id;kd.campEnd=S.day+7;
-    const n=Math.floor(sol.length*0.7);
+    kd.campGoal=best.id;kd.campEnd=S.day+9;
+    const n=Math.max(4,Math.floor(sol.length*(near?0.85:0.7)));
     sol.slice(0,n).forEach(u=>{u.guard=0;u.camp=best.id;u.st='amove';u.gx=best.x+1;u.gy=best.y+3;u.path=null;u.tg=0;});
-    if(k.rel>=30)log('⚔ '+K.n+' bir haydut kampına sefer düzenledi.');
+    if(k.rel>=30||near)log('⚔ '+K.n+' topraklarındaki haydut kampına ordu gönderdi.');
    }
-   kd.campCool=ri(12,22);
+   kd.campCool=near?ri(4,8):ri(12,22);
   }
   if(kd.campGoal){
    const c=S.camps.find(c=>c.id===kd.campGoal);

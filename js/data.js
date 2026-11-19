@@ -82,6 +82,7 @@ const BT={
  bkule:{n:'Kara Gözcü Kulesi',ic:'🏯',w:2,h:2,hp:1100,atk:20,rng:10,cost:{},time:0,col:'#3a1a1a',enemy:1,d:'Maldric\'in ok kulesi.'},
  bduvar:{n:'Kara Sur',ic:'🧱',w:1,h:1,hp:650,cost:{},time:0,col:'#4a3a3a',enemy:1,wall:1},
  fkule:{n:'Gözcü Kulesi',ic:'🏯',w:2,h:2,hp:700,atk:14,rng:9,col:'#888',foreign:1},
+ fkapi:{n:'Sur Kapısı',ic:'🚪',w:1,h:1,hp:420,col:'#8a6a4a',foreign:1,wall:1,gate:1},
  fduvar:{n:'Sur',ic:'🧱',w:1,h:1,hp:420,col:'#8a8a90',foreign:1,wall:1},
  ftc:{n:'Krallık Merkezi',ic:'🏰',w:4,h:4,hp:1800,col:'#777',foreign:1},
  fev:{n:'Köylü Evi',ic:'🏠',w:2,h:2,hp:160,col:'#8a6a4a',foreign:1},
