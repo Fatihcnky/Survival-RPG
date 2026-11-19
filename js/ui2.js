@@ -137,7 +137,7 @@ function armyBar(){
  const us=UI.sel&&UI.sel.kind==='u'?UI.sel.ids.map(id=>UM.get(id)).filter(Boolean):[];
  if(us.length&&!panelOpen){
   const mil=us.filter(u=>UT[u.t].mil);
-  h+='<span class="sbn">'+(us.length===1?UT[us[0].t].g+' '+UT[us[0].t].n+(us[0].job?' ('+JOBNAME(us[0].job)+')':'')+' ❤'+Math.ceil(us[0].hp):'✅ '+us.length+' birim seçili')+'</span>';
+  h+='<span class="sbn">'+(us.length===1?UT[us[0].t].g+' '+UT[us[0].t].n+(us[0].nm?' '+us[0].nm:'')+(us[0].pt&&VT[us[0].pt]?' ['+VT[us[0].pt].n+']':'')+(us[0].job?' ('+JOBNAME(us[0].job)+')':'')+' ❤'+Math.ceil(us[0].hp):'✅ '+us.length+' birim seçili')+'</span>';
   if(mil.length){h+=btn('🛑 Dur','hold')+btn('🏠 Geri çek','retreat')+btn('≡ Aynı tip','seltype',us[0].t);}
   h+=btn('⚔ Tüm ordu','selarmy')+btn('✖','desel');
  }else if(sd.length){

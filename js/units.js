@@ -199,7 +199,7 @@ function updVillager(u,dt){
   case 'gather':{
    const i=u.ti,j=u.job;
    if(!j||!JOBRES[j]||i<0||T[i]!==resOf(u)[0]||RA[i]<=0){u.ti=-1;if(u.carry>0.5)toDrop(u);else u.st='idle';break;}
-   const a=Math.min(gatherRate(j)*dt,RA[i],10-u.carry);
+   const a=Math.min(gatherRate(j)*(typeof vtMul==='function'?vtMul(u):1)*dt,RA[i],10-u.carry);
    u.carry+=a;RA[i]-=a;
    if(RA[i]<=0.01){RA[i]=0;T[i]=0;}
    if(u.carry>=9.99||RA[i]<=0){if(u.carry>0.5)toDrop(u);else u.st='idle';}

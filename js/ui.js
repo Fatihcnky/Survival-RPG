@@ -145,7 +145,7 @@ function pMkt(){
  if(!countB('pazar',true))return '<h4>Pazar</h4><small>Önce bir 🏪 Pazar inşa etmelisin.</small>';
  let h='<h4>Pazar (altın: '+Math.floor(S.res.gold)+')</h4>';
  ['food','wood','stone','iron'].forEach(k=>{
-  h+='<div class="row"><b style="width:90px;display:inline-block">'+RI[k]+' '+RN[k]+'</b>'+btn('Sat 50','sell',k,S.res[k]<50)+btn('Al 50','buy',k,S.res.gold<Math.ceil(buyPrice(k)*50))+'<small>Sat: '+sellPrice(k).toFixed(2)+'💰 · Al: '+buyPrice(k).toFixed(2)+'💰 (birim)</small></div>';
+  h+='<div class="row"><b style="width:90px;display:inline-block">'+RI[k]+' '+RN[k]+'</b>'+btn('Sat 50','sell',k,S.res[k]<50)+btn('Al 50','buy',k,S.res.gold<Math.ceil(buyPrice(k)*50))+'<small>'+(typeof seasTrend==='function'?seasTrend(k):'')+' Sat: '+sellPrice(k).toFixed(2)+'💰 · Al: '+buyPrice(k).toFixed(2)+'💰 (birim)</small></div>';
  });
  return h;
 }
