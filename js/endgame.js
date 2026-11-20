@@ -75,20 +75,20 @@ function egBossCheck(){
 (function(){const _k=killKingdom;killKingdom=function(i){const was=S.kings[i].dead;_k(i);if(!was&&S.founded){egS();S.eg.pendB=(S.eg.pendB||[]).concat([{i,at:S.day+4}]);}};})();
 // ---- felaketler ----
 function egDisaster(){
- const E=egS(),tp=Math.floor(Math.random()*4);
+ const E=egS(),tp=Math.floor(Math.random()*4),gk=countB('gozkule',true)?0.5:1;
  const vil=S.units.filter(u=>!u.dead&&u.team==='p'&&u.t==='koylu');
  if(tp===0){
   const h=countB('hastane',true),sp=countB('sapel',true)+countB('katedral',true)*2;
-  const pct=Math.max(0.03,0.14-0.035*h-0.01*sp);
+  const pct=Math.max(0.03,0.14-0.035*h-0.01*sp)*gk;
   let n=Math.round(vil.length*pct);
   for(let k=0;k<n;k++){const u=pick(vil);if(u&&!u.dead)killU(u);}
   showModal('☠ Veba',n+' köylü salgında öldü. '+(h?'Hastaneler kaybı azalttı.':'Hastane kurmak kaybı azaltırdı.'),[{t:'Yazık'}]);
  }else if(tp===1){
-  const dp=countB('depo',true);const l=Math.max(0.15,0.4-0.03*dp);
+  const dp=countB('depo',true);const l=Math.max(0.15,0.4-0.03*dp)*gk;
   const lost=Math.round(S.res.food*l);S.res.food-=lost;
   showModal('🌾 Kıtlık','Böcek ve kuraklık ambarları vurdu. '+lost+' yiyecek bozuldu.',[{t:'Ah!'}]);
  }else if(tp===2){
-  const lw=Math.round(S.res.wood*0.3),ls=Math.round(S.res.stone*0.15);S.res.wood-=lw;S.res.stone-=ls;
+  const lw=Math.round(S.res.wood*0.3*gk),ls=Math.round(S.res.stone*0.15*gk);S.res.wood-=lw;S.res.stone-=ls;
   showModal('🌊 Büyük Sel','Nehir taştı. '+lw+' odun ve '+ls+' taş sular altında kaldı.',[{t:'Toparlan'}]);
  }else{
   addRes('iron',400);addRes('gold',250);
