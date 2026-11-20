@@ -161,13 +161,22 @@ const EVENTS=[
   const ks=['stone','iron','wood'],k=ks[ri(0,2)],n=100,price=Math.ceil(MBASE[k]*n*0.7*S.mkt[k]);
   showModal('🛒 Gezgin tüccar',n+' '+RN[k]+' teklif ediyor: '+price+' altın.',[
    {t:'Satın al ('+price+' 💰)',fn:()=>{if(S.res.gold>=price){S.res.gold-=price;addRes(k,n);}else log('⛔ Altın yetersiz.');}},
+   {t:'Pazarlık (%'+Math.round(pOdds(12,envBonus())*100)+')',fn:()=>{const d=dice(null,12,envBonus());let t=d.txt+'\n\n';
+     if(d.m>=5){const c=Math.round(price*0.6);if(S.res.gold>=c){S.res.gold-=c;addRes(k,Math.round(n*1.2));t+='Tüccar çok etkilendi: '+Math.round(n*1.2)+' '+RN[k]+' sadece '+c+' altına!';}else t+='Anlaştınız ama altının yetmedi.';}
+     else if(d.m>=0){const c=Math.round(price*0.8);if(S.res.gold>=c){S.res.gold-=c;addRes(k,n);t+='%20 indirimle '+c+' altına aldın.';}else t+='Altının yetmedi.';}
+     else if(d.m>-5)t+='Tüccar pazarlığı beğenmedi ve yoluna devam etti.';
+     else{t+='Tüccar sinirlendi ve sana bozuk mal satmaya çalıştığını söyleyip hakaret etti. Halk güldü: -3 mutluluk.';S.happy=Math.max(0,S.happy-3);}
+     showModal('🛒 Pazarlık',t,[{t:'Tamam'}]);}},
    {t:'Geç'}]);}},
  {w:2,ok:()=>seas()===1||seas()===2,fn:()=>{const f=ri(60,150);addRes('food',f);log('🌾 Bereketli hasat! +'+f+' yiyecek.');}},
  {w:1,ok:()=>true,fn:()=>{const g=ri(40,120);addRes('gold',g);log('💎 Çocuklar eski bir define buldu: +'+g+' altın.');}},
  {w:2,ok:()=>true,fn:()=>{const f=ri(50,110);addRes('food',f);log('🦌 Avcılar bol av getirdi: +'+f+' yiyecek.');}},
  {w:2,ok:()=>S.day>=12&&S.res.wood>60,fn:()=>{const l=Math.floor(S.res.wood*0.15);S.res.wood-=l;log('⛈ Fırtına odun deposunu vurdu: -'+l+' odun.');}},
  {w:2,ok:()=>S.day>=12&&S.res.food>80,fn:()=>{const l=Math.floor(S.res.food*0.12);S.res.food-=l;log('🐀 Fareler ambara girdi: -'+l+' yiyecek.');}},
- {w:1.5,ok:()=>S.day>=14&&S.res.gold>80,fn:()=>{const l=Math.min(S.res.gold,ri(50,130));S.res.gold-=l;log('🥷 Hırsızlar hazineden '+l+' altın çaldı!');}},
+ {w:1.5,ok:()=>S.day>=14&&S.res.gold>80,fn:()=>{const l=Math.min(S.res.gold,ri(50,130)),sp=bestSpy('gozet'),mil=S.units.filter(u=>!u.dead&&u.team==='p'&&UT[u.t].mil).length,b=spBonus(sp,'gozet')+Math.floor(mil/10);S.res.gold-=l;
+  showModal('🥷 Hırsızlık!','Gece hazineden '+l+' altın çalındı. İzleri takip edebilirsin: d20 + '+b+' ('+(sp?sp.nm+' + ':'')+'ordu) → ZB 13 (%'+Math.round(pOdds(13,b)*100)+')',[
+   {t:'Takip et',fn:()=>{const d=dice(null,13,b);if(sp)sp.busy=S.day+2;let t=d.txt+'\n\n';if(d.m>=0){addRes('gold',l+Math.round(l*0.3));t+='Hırsızlar yakalandı: '+l+' altın geri geldi, üstüne %30 tazminat.';}else if(d.m>-5)t+='İzler kayboldu.';else{t+='Takip sırasında 2 asker pusuya düştü.';S.units.filter(u=>!u.dead&&u.team==='p'&&UT[u.t].mil).slice(0,2).forEach(u=>killU(u));}showModal('🥷 Takip',t,[{t:'Tamam'}]);}},
+   {t:'Bırak'}]);}},
  {w:1.5,ok:()=>S.day>=14&&seas()===1&&countB('ciftlik',true)>0,fn:()=>{S.drought=3;log('☀ Kuraklık! 3 gün boyunca çiftlik verimi yarıya düşer.');}},
  {w:2,ok:()=>S.day>=16&&!S.epi&&popNow()>12,fn:()=>{S.epi={left:3,sev:1+Math.random()*0.5};showModal('🤒 Salgın!','Köyde hastalık yayılıyor. Hastane ve şifacılar kayıpları azaltır.',[{t:'Anladım'}]);}},
  {w:2,ok:()=>S.age>=1&&S.blds.filter(b=>b.team==='p'&&b.done).length>3,fn:()=>{const b=pickRandomBuilding();if(b)startFire(b);}},
@@ -182,7 +191,8 @@ const EVENTS=[
  {w:2,ok:()=>S.day>=8,fn:()=>{
   showModal('🎻 Gezgin ozan','Bir ozan köy meydanında şarkı söylemek istiyor. Ziyafet için 30 yiyecek ister.',[
    {t:'Konaklat (30 🍖)',fn:()=>{if(S.res.food>=30){S.res.food-=30;S.happy=Math.min(100,S.happy+8);log('🎻 Ozan hanedanını öven bir şarkı yazdı. Halk neşelendi.');}}},
-   {t:'Geç'}]);}},
+   {t:'Handa kalsın (60 🍖 + 40 💰)',fn:()=>{if(countB('han',true)<1){log('⛔ Ozanın kalacağı bir Han yok. Han kurunca tekrar gelir.');return;}if(S.res.food>=60&&S.res.gold>=40){S.res.food-=60;S.res.gold-=40;S.eg=S.eg||{};S.eg.ozan=S.day+40;S.happy=Math.min(100,S.happy+8);log('🎻 Ozan handa kaldı: 40 gün boyunca halkın morali +3.');}else log('⛔ Kaynak yetersiz.');}},
+   {t:'Geç',fn:()=>{S.happy=Math.max(0,S.happy-1);}}]);}},
  {w:1.5,ok:()=>S.age>=1,fn:()=>{
   showModal('🙏 Hacılar','Uzak diyarlardan gelen hacılar köyünüzde duaya katılmak ve bağış toplamak istiyor.',[
    {t:'Bağış ver (40 💰)',fn:()=>{if(S.res.gold>=40){S.res.gold-=40;S.happy=Math.min(100,S.happy+10);}}},
@@ -218,11 +228,7 @@ const EVENTS=[
   showModal('🤒 Varis hastalandı',h.name+' ağır bir ateşle yatıyor. Şifacı çağırmak 50 altına mal olur.',[
    {t:'Şifacı çağır (50 💰)',fn:()=>{if(S.res.gold>=50){S.res.gold-=50;log('💊 '+h.name+' iyileşti.');}else if(Math.random()<0.5){S.dyn.heirs=S.dyn.heirs.filter(x=>x!==h);S.happy=Math.max(0,S.happy-10);log('⚰ '+h.name+' hayatını kaybetti.');}}},
    {t:'Dua et',fn:()=>{if(Math.random()<0.4){S.dyn.heirs=S.dyn.heirs.filter(x=>x!==h);S.happy=Math.max(0,S.happy-10);log('⚰ '+h.name+' hayatını kaybetti. Hanedan yasta.');}else log('🙏 Dualar kabul oldu, '+h.name+' iyileşti.');}}]);}},
- {w:1.5,ok:()=>S.dyn.spouse&&S.day>=20,fn:()=>{
-  showModal('🗡 Saray entrikası','Soylular arasında hanedana karşı fısıltılar dolaşıyor. Sorgulamak için 60 altın gerekir.',[
-   {t:'Soruştur (60 💰)',fn:()=>{if(S.res.gold>=60){S.res.gold-=60;S.happy=Math.min(100,S.happy+4);log('🔍 Komplo ortaya çıktı ve önlendi.');}}},
-   {t:'Görmezden gel',fn:()=>{S.happy=Math.max(0,S.happy-6);}}]);}}
-
+ {w:1.5,ok:()=>S.dyn.spouse&&S.day>=20&&typeof plotStart==='function',fn:()=>{plotStart();}}
 ];
 function rollEvent(){
  const list=EVENTS.filter(e=>e.ok());
