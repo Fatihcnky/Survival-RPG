@@ -26,7 +26,7 @@ function launchRaid(only){
  S.stats.raids++;
  log('⚠ HAYDUT BASKINI! '+size+' haydut kampından yola çıktı.',c.x,c.y);
  S.kings.forEach((k,i)=>{
-  if(k.pact==='ittifak'&&k.rel>=40){
+  if((k.pact==='ittifak'&&k.rel>=40)||(k.vassal&&!k.dead)){
    const n=3+Math.floor(k.str/20),p=spawnPos(tc);
    for(let j=0;j<n;j++)mkUnit(Math.random()<0.5?'mizrakli':'okcu','a',p.x+j*0.5,p.y,{life:120,st:'idle'});
    log('🤝 '+KINGS[i].n+' yardım birliği gönderdi ('+n+' asker).',p.x,p.y);
@@ -102,6 +102,7 @@ function declareWar(i,byPlayer){
 function kingsDay(){
  S.kings.forEach((k,i)=>{
   if(k.dead)return;
+  if(k.vassal){if(typeof vassalDay==='function')vassalDay(i);return;}
   const kg=KINGS[i];
   k.str=20+S.day*(kg.pers==='savasci'?2.2:1.3);
   if(k.pact)k.rel=Math.min(100,k.rel+0.3);else k.rel+=(0-k.rel)*0.01;

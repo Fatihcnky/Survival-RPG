@@ -125,11 +125,12 @@ function pProg(){
  return h;
 }
 function pDip(){
- if(!elcilikOk())return '<h4>Diplomasi</h4><small>Önce bir 🕊 Elçilik inşa etmelisin (Üretim & Şehir).</small>';
+ if(!elcilikOk())return '<h4>Diplomasi</h4><small>Önce bir 🕊 Elçilik inşa etmelisin (Üretim & Şehir).</small>'+(typeof vassalBlock==='function'?S.kings.map((s,i)=>s.vassal?vassalBlock(i):'').join(''):'');
  let h='<h4>Komşu krallıklar</h4>';
  KINGS.forEach((k,i)=>{
   const s=S.kings[i];
   if(s.dead){h+='<div style="margin:6px 0;padding:6px;border:1px dashed #666;border-radius:8px;opacity:.7">⚰ <b>'+k.n+'</b> — yok oldu'+(s.fall==='b'?' <small>(haydutlar yıktı; komşular azalırsa yeniden doğabilir)</small>':'')+'</div>';return;}
+  if(s.vassal&&typeof vassalBlock==='function'){h+=vassalBlock(i);return;}
   h+='<div style="margin:6px 0;padding:6px;border:1px solid '+k.col+';border-radius:8px"><b>'+k.n+'</b> — '+k.who+'<br><small>'+k.d+'</small><br>İlişki: '+Math.round(s.rel)+' '+bar((s.rel+100)/200)+' · Durum: '+(s.war?'⚔ SAVAŞ':s.pact==='ittifak'?'🤝 İttifak':s.pact?'📜 Ticaret':'—')+'<div class="row">';
   h+=btn('🎁 Hediye (50💰)','gift',i,S.res.gold<50);
   if(!S.dyn.spouse&&!s.war)h+=btn('💍 Evlilik (150💰)','marry',i,s.rel<30||S.res.gold<150);

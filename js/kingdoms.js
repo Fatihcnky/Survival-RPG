@@ -103,15 +103,13 @@ function reviveKingdom(i){
  showModal('👑 Yeni krallık','Yıkılan '+K.n+' küllerinden doğdu: hayatta kalanlar toplanıp yeni bir hanedan kurdu ('+K.who+' ailesinden biri tahta çıktı). Yeni komşuyla ilişkiler sıfırdan başlıyor.',[{t:'Hayırlı olsun'}]);
 }
 function kingdomsDay(){
- if(aliveKings()<4){
-  const c=S.kings.map((k,i)=>({k,i})).filter(o=>o.k.dead&&S.day-o.k.deadDay>=(o.k.fall==='b'?12:16));
-  if(c.length&&Math.random()<0.45)reviveKingdom(c[0].i);
- }
  KINGS.forEach((K,i)=>{
   const kd=kdOf(i),k=S.kings[i];
   if(k.dead)return;
   const folk=kUnits(i,u=>u.t==='fkoylu'),sol=kUnits(i,u=>UT[u.t].mil);
   const tc=kBlds(i,'ftc')[0];
+  if(!tc&&k.war&&!k.vassal&&!k.vOffered&&typeof offerVassal==='function'){offerVassal(i);return;}
+  if(k.vOffered===1)return;
   if(!tc){ // merkez yıkıldıysa halk yeniden kurar; kimse kalmadıysa krallık yok olur
    if(!folk.length&&!sol.length){killKingdom(i);return;}
    if(kd.wood>=100&&folk.length){const p=kFind(i,4,4);if(p){mkB('ftc','f',p.x,p.y,true,{kid:i});kd.wood-=100;}}
