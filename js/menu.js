@@ -30,7 +30,7 @@ function menuOptions(){
 }
 function showDiff(cb,back){
  const L=$('diffList');
- L.innerHTML=['kolay','normal','zor','efsane'].map(k=>{const d=DIFFS[k];return '<button class="dc '+k[0]+'" data-a="dpick" data-v="'+k+'"><b>'+d.ic+' '+d.n+'</b><small>'+d.sub+'</small><div>'+d.lines.join('<br>')+'</div></button>';}).join('');
+ L.innerHTML=['kolay','normal','zor','efsane'].concat((typeof META!=='undefined'&&META.ach&&META.ach.fort)?['destan']:[]).map(k=>{const d=DIFFS[k];return '<button class="dc '+k[0]+'" data-a="dpick" data-v="'+k+'"><b>'+d.ic+' '+d.n+'</b><small>'+d.sub+'</small><div>'+d.lines.join('<br>')+'</div></button>';}).join('');
  $('diffscr').style.display='flex';
  showDiff.cb=cb;showDiff.back=back;
 }

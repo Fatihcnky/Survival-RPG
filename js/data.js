@@ -11,6 +11,9 @@ const DIFFS={
   lines:['❄ Kışlar uzun (22 gün) ve sert: çok yakacak gerekir','🌾 Kaynaklar kıt: az stok, düşük üretim','⚔ Baskınlar sık ve büyük','🏰 Krallıklar daha sık savaş açar, orduları güçlü']},
  efsane:{n:'Efsane',ic:'💀',sub:'Acımasız Çağ',sl:[12,14,14,26],res:0.5,prod:0.8,cold:1.8,raid:1.8,rf:0.65,war:2.4,k:1.5,
   lines:['❄ Kışlar çok uzun (26 gün) ve ölümcül','🌾 Çok kıt kaynaklar, zor ekonomi','⚔ Sürekli ve ağır baskınlar','🏰 Krallıklar saldırgan, orduları çok güçlü']}
+,
+ destan:{n:'Destan',ic:'👑',sub:'Yeni Oyun+ (Kara Kale\'yi yıkınca açılır)',sl:[12,12,14,28],res:0.4,prod:0.75,cold:2.2,raid:2.3,rf:0.55,war:3,k:1.9,
+  lines:['❄ Kışlar 28 gün, donduran soğuk','🌾 Aşırı kıt kaynak','⚔ Kül Tarikatı ve haydutlar acımasız','🏰 Krallıklar çok güçlü ve saldırgan','🏆 Skor ×2,6']}
 };
 function dif(){return DIFFS[(typeof S!=='undefined'&&S&&S.diff)||'normal']||DIFFS.normal;}
 function applyDiff(){const d=dif();for(let i=0;i<4;i++)SL[i]=d.sl[i];YEARD=SL[0]+SL[1]+SL[2]+SL[3];}

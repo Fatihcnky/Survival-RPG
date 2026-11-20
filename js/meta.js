@@ -38,7 +38,7 @@ function achText(){
 }
 // ---- skor ----
 function scoreNow(){
- const dm={kolay:0.7,normal:1,zor:1.4,efsane:2}[S.diff||'normal']||1;
+ const dm={kolay:0.7,normal:1,zor:1.4,efsane:2,destan:2.6}[S.diff||'normal']||1;
  let sc=S.day*3+popNow()*8+(S.age||0)*150+(S.rank||0)*120+st_('camps')*60+st_('kills')*2+Object.keys(S.techs).length*25+Math.floor((S.res.gold||0)/20)+Math.floor(S.story)*40+(S.won?1000:0);
  return Math.round(sc*dm);
 }
