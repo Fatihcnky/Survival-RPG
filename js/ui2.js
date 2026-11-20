@@ -158,7 +158,7 @@ function pArmy(){
  h+='<div class="row">'+btn('⚔ Tüm orduyu seç','selarmy')+btn('▭ Kutu seç','box')+btn('🏠 Geri çek','retreat')+btn('🛑 Dur','hold')+'</div>';
  h+='<small>Seç → haritaya dokun: yürü · düşmana dokun: saldır. Askere çift dokun: aynı türdekilerin hepsini seçer. Kutu seçimde parmağını sürükle.</small>';
  h+='<h4>Eğitim</h4><div class="grid">';
- ['mizrakli','kilic','okcu','atliokcu','atli','top'].forEach(t=>{
+ ['mizrakli','kilic','okcu','atliokcu','atli','kocbasi','mancinik','top'].forEach(t=>{
   const d=UT[t],b=bestTrainer(t),why=canTrain(t)||(b?'':BT[Object.keys(BT).find(k=>BT[k].train&&BT[k].train.includes(t))].n+' gerekli');
   h+='<div class="jcard'+(why?' lk':'')+'"><div class="th"><b>'+d.g+' '+d.n+'</b></div><small>❤'+d.hp+' ⚔'+d.atk+' 🛡'+d.arm+'</small><small>'+(why?'🔒 '+why:cstr(d.cost)+' · '+d.time+'sn')+'</small><div class="pm">'+btn('+1','train',t,!!why,b?b.id:0)+btn('×5','train5',t,!!why,b?b.id:0)+'</div></div>';
  });

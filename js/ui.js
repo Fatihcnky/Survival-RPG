@@ -92,7 +92,7 @@ function pArmy(){
  const sd=soldiers();const cnt={};sd.forEach(u=>cnt[u.t]=(cnt[u.t]||0)+1);
  let h='<h4>Ordu: '+sd.length+' asker'+(sd.length?' ('+Object.keys(cnt).map(k=>UT[k].g+cnt[k]).join(' ')+')':'')+'</h4>';
  h+='<div class="row">'+btn('Tüm orduyu seç','selarmy')+btn('🏠 Geri çekil','retreat')+'<small>Seçince haritaya dokun: yürü/saldır. Düşmana dokun: hedef al.</small></div>';
- ['mizrakli','kilic','okcu','atliokcu','atli','top'].forEach(t=>{
+ ['mizrakli','kilic','okcu','atliokcu','atli','kocbasi','mancinik','top'].forEach(t=>{
   const d=UT[t],b=bestTrainer(t),why=canTrain(t)||(b?'':BT[Object.keys(BT).find(k=>BT[k].train&&BT[k].train.includes(t))].n+' gerekli');
   h+='<div class="row">'+btn(d.g+' '+d.n,'train',t,!!why,b?b.id:0)+btn('×5','train5',t,!!why,b?b.id:0)+'<small>'+(why?'🔒 '+why:cstr(d.cost)+' · '+d.time+'sn')+'<br>❤'+d.hp+' ⚔'+d.atk+' 🛡'+d.arm+'</small></div>';
  });

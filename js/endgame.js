@@ -132,6 +132,6 @@ function egDay(){
 // ---- etiketler ----
 function egLabels(xa,xb,ya,yb){
  const E=S.eg;if(!E)return;
- for(const r of E.ruins)if(!r.got&&fogAt(r.x,r.y)>=1)text('🏺 Aldora Kalıntısı',r.x+1,r.y-0.3,12,'#ffd54f');
- for(const b of E.bosses)if(!b.done&&fogAt(b.x,b.y)>=1)text('🗡 '+b.n,b.x+1,b.y-0.5,12,'#ff8a65');
+ for(const r of (E.ruins||[]))if(!r.got&&fogAt(r.x,r.y)>=1)text('🏺 Aldora Kalıntısı',r.x+1,r.y-0.3,12,'#ffd54f');
+ for(const b of (E.bosses||[]))if(!b.done&&fogAt(b.x,b.y)>=1)text('🗡 '+b.n,b.x+1,b.y-0.5,12,'#ff8a65');
 }
