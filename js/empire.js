@@ -46,6 +46,8 @@ function egAlerts(){
  if(S.raidAt&&S.raidAt-S.day<=2&&S.raidAt>=S.day)L.push({t:'Haydut baskını yaklaşıyor',crit:0});
  const E=S.eg;if(E&&E.nextDis&&E.nextDis-S.day<=3&&E.nextDis>=S.day&&countB('gozkule',true))L.push({t:'Gökbilimciler bir felaket öngörüyor ('+(E.nextDis-S.day)+' gün)',crit:0});
  if(E&&E.act2&&E.nextCult-S.day<=2&&E.nextCult>=S.day)L.push({t:'Kül Tarikatı hareketleniyor',crit:0});
+
+ if(E&&E.sponsor>=0&&!E.cultEnded&&S.kings[E.sponsor])L.push({t:'Kül Tarikatı destekçisi: '+KINGS[E.sponsor].n+' — yok et ya da vasal yap',crit:0});
  return L;
 }
 function stateBlock(){

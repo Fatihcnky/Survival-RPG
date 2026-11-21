@@ -7,16 +7,7 @@ BT.liman={n:'Liman',ic:'⚓',w:3,h:3,hp:420,age:2,cost:{wood:260,stone:120,gold:
 BT.simya={n:'Simya Laboratuvarı',ic:'⚗',w:3,h:3,hp:360,age:3,cost:{wood:200,stone:200,gold:250,iron:60},time:50,col:'#7a5aa0',d:'Her gün bir iksir üretir (10 altın + 6 yiyecek). İksir: ordunu iyileştirir ve bir gün +%20 saldırı verir. Salgın kaybını azaltır.'};
 BCAT[1][1].push('liman');BCAT[2][1].push('simya');
 (function(){
- const _fx=fxm;fxm=function(k){let m=_fx(k);if(k==='atk'&&S&&S.alc&&S.alc>S.t)m*=1.2;return m;};
- const _du=drawUnit;drawUnit=function(u){
-  if(u.t==='kocbasi'||u.t==='mancinik'){
-   const col=u.team==='b'?'#c62828':(u.team==='p'?'#3a6fd8':'#888');
-   ctx.fillStyle='#0003';ctx.beginPath();ctx.ellipse(u.x,u.y+0.3,0.4,0.1,0,0,6.3);ctx.fill();
-   ctx.strokeStyle=col;ctx.lineWidth=0.06;ctx.beginPath();ctx.ellipse(u.x,u.y+0.28,0.42,0.14,0,0,6.3);ctx.stroke();
-   ctx.drawImage(spr(UT[u.t].g),u.x-0.55,u.y-0.7,1.1,1.1);
-   if(u.hp<u.mhp){ctx.fillStyle='#000a';ctx.fillRect(u.x-0.4,u.y-0.8,0.8,0.09);ctx.fillStyle=u.hp/u.mhp>0.5?'#5c5':'#e55';ctx.fillRect(u.x-0.4,u.y-0.8,0.8*u.hp/u.mhp,0.09);}
-   return;}
-  return _du(u);};
+ const _fx=fxm;fxm=function(k){let m=_fx(k);if(k==='atk'&&S&&S.alc&&S.alc>S.t)m*=(S.techs&&S.techs.iksir2?1.35:1.2);return m;};
  const _pr=placeReason;placeReason=function(t){if(t==='simya'&&countB('simya',false)>0)return'Zaten var';return _pr(t);};
 })();
 // ---- casusluk ----
@@ -45,7 +36,7 @@ function spyAct(a,i){
 function simyaDay(){
  if(!countB('simya',true))return;
  S.pot=S.pot||0;
- if(S.pot<10&&S.res.gold>=10&&S.res.food>=6){S.res.gold-=10;S.res.food-=6;S.pot++;}
+ const cap=S.techs.iksir2?20:10,n=S.techs.iksir2?2:1;for(let k=0;k<n;k++)if(S.pot<cap&&S.res.gold>=10&&S.res.food>=6){S.res.gold-=10;S.res.food-=6;S.pot++;}
 }
 function potionUse(){
  if(!(S.pot>0))return;S.pot--;S.alc=S.t+DAY;
@@ -59,8 +50,8 @@ function seaDay(){
  if(S.day<S.sea.next)return;S.sea.next=S.day+6;
  const ships=Math.min(L,4),roll=Math.random();
  const mil=S.units.filter(u=>!u.dead&&u.team==='p'&&UT[u.t].mil).length;
- if(roll<Math.max(0.05,0.22-0.004*mil)){log('🏴‍☠ Korsanlar '+ships+' gemini yağmaladı! Ordu büyütmek korsan riskini azaltır.');return;}
- const g=Math.round((110+Math.min(S.day,300)*0.6)*ships),r=pick(['wood','stone','iron','food']),n=Math.round(60*ships*(1+S.rank*0.3));
+ if(roll<Math.max(0.03,0.22-0.004*mil)*(S.techs.donanma?0.3:1)){log('🏴‍☠ Korsanlar '+ships+' gemini yağmaladı! Ordu büyütmek korsan riskini azaltır.');return;}
+ const g=Math.round((110+Math.min(S.day,300)*0.6)*ships*(S.techs.gemi?1.4:1)*(S.techs.donanma?1.25:1)),r=pick(['wood','stone','iron','food']),n=Math.round(60*ships*(1+S.rank*0.3));
  addRes('gold',g);addRes(r,n);
  log('⚓ Gemiler döndü: +'+g+' altın, +'+n+' '+({wood:'odun',stone:'taş',iron:'demir',food:'yiyecek'})[r]+'.');
  S.stats.sea=(S.stats.sea||0)+1;

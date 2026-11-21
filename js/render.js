@@ -159,7 +159,7 @@ function draw(){
  KINGS.forEach((k,i)=>{if(S.kings[i].dead||fogAt(k.x,k.y)===0)return;const kk=S.kings[i];const st=kk.war?'⚔':kk.pact==='ittifak'?'🤝':kk.pact?'📜':'';text(k.n+' '+st,k.x,k.y-3.2,12,'#fff');});
  if(S.sf&&S.sf.fort&&!S.sf.maldricDead&&fogAt(S.sf.fort.x,S.sf.fort.y)>=1)text('Kara Kale',S.sf.fort.x+2,S.sf.fort.y-0.4,13,'#ff5252');
 if(typeof egLabels==="function")egLabels(xa,xb,ya,yb);
- S.camps.forEach(c=>{if(c.alive&&fogAt(c.x,c.y)>=1&&c.x>=xa-2&&c.x<=xb+2&&c.y>=ya-2&&c.y<=yb+2)text('Haydut Kampı',c.x+1,c.y-0.4,11,'#ff8a80');});
+ S.camps.forEach(c=>{if(c.alive&&fogAt(c.x,c.y)>=1&&c.x>=xa-2&&c.x<=xb+2&&c.y>=ya-2&&c.y<=yb+2)text(c.cult?'🔥 Kül Tarikatı Kampı':'Haydut Kampı',c.x+1,c.y-0.4,11,c.cult?'#ff7043':'#ff8a80');});
  // gece ışıkları
  {const td=(S.t%DAY)/DAY;if(td>0.78||td<0.06){ctx.globalCompositeOperation='lighter';for(const b of S.blds){if(!b.done||!LIGHT[b.t]||!vis(b))continue;const g=ctx.createRadialGradient(b.x+b.w/2,b.y+b.h/2,0.1,b.x+b.w/2,b.y+b.h/2,2.2);g.addColorStop(0,'rgba(255,200,90,0.35)');g.addColorStop(1,'rgba(255,200,90,0)');ctx.fillStyle=g;ctx.fillRect(b.x-2,b.y-2,b.w+4,b.h+4);}ctx.globalCompositeOperation='source-over';}}
  // gece/gündüz

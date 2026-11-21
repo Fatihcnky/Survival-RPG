@@ -19,10 +19,10 @@ const RUINLORE=[
 ];
 function egStartAct2(){
  const E=egS();if(E.act2)return;E.act2=1;
- E.nextCult=S.day+10;E.nextDis=Math.min(E.nextDis||999,S.day+20);
+ E.act2Day=S.day;E.nextCult=S.day+30;E.nextDis=Math.min(E.nextDis||999,S.day+20);
  let n=0;
  for(let i=0;i<5;i++){const p=egFindWalk(MW/2+(Math.random()*2-1)*MW*0.38,MH/2+(Math.random()*2-1)*MH*0.38,24,28);if(!p)continue;E.ruins.push({x:p.x,y:p.y,got:0,i});revealC(p.x,p.y,4);n++;}
- showModal('🌑 Küllerin Ötesi','Kara Kale düştü ama Maldric\'in sandığında kül renkli bir mühür buldun. Bertram solgun yüzle fısıldıyor:\n"Maldric kendi başına değildi. Eski Aldora\'nın kalıntılarını arayan bir Kül Tarikatı ona para ve asker verdi. Şimdi lideri öldü, onlar sana yöneliyor."\n\nHarita üzerinde '+n+' Aldora kalıntısı belirdi (🏺). Her birine bir birlik gönder; hepsini toplarsan Aldora\'nın Mirası açılacak. Kül Tarikatı\'nın baskınlarına hazırlıklı ol!',[{t:'Hazırım'}]);
+ showModal('🌑 Küllerin Ötesi','Kara Kale düştü ama Maldric\'in sandığında kül renkli bir mühür buldun. Bertram solgun yüzle fısıldıyor:\n"Maldric kendi başına değildi. Eski Aldora\'nın kalıntılarını arayan bir Kül Tarikatı ona para ve asker verdi. Şimdi lideri öldü, onlar sana yöneliyor."\n\nHarita üzerinde '+n+' Aldora kalıntısı belirdi (🏺). Her birine bir birlik gönder; hepsini toplarsan Aldora\'nın Mirası açılacak. Kül Tarikatı bir yerlerde kamp kuruyor; ama onları kimin beslediğini henüz bilmiyorsun...',[{t:'Hazırım'}]);
 }
 function egRuinCheck(){
  const E=egS();
@@ -40,16 +40,57 @@ function egRuinCheck(){
   break;
  }
 }
-// ---- Kül Tarikatı baskını ----
+// ---- Kül Tarikatı: nadir kamplar, casus raporu, destekçi krallık ----
+function egCultCamp(){
+ const E=egS();let tries=0;
+ while(tries++<500){
+  const x=ri(6,MW-9),y=ri(6,MH-9);
+  if(Math.hypot(x-S.start.x,y-S.start.y)<40)continue;
+  if(S.blds.some(b=>b.team==='p'&&Math.hypot(b.x-x,b.y-y)<30))continue;
+  if(KINGS.some(k=>Math.hypot(k.x-x,k.y-y)<18))continue;
+  if(S.camps.some(c=>c.alive&&Math.hypot(c.x-x,c.y-y)<20))continue;
+  for(let dy=-3;dy<=4;dy++)for(let dx=-3;dx<=4;dx++){const X=x+dx,Y=y+dy;if(inMap(X,Y)&&OCC[Y*MW+X]===0&&T[Y*MW+X]!==1&&T[Y*MW+X]!==0){T[Y*MW+X]=0;RA[Y*MW+X]=0;}}
+  if(!walkRect(x,y,2,2))continue;
+  const tent=mkB('tent','b',x,y,true);tent.hp=tent.mhp=Math.round((tent.mhp||200)*2.5);
+  const c={id:S.camps.length+1,x,y,tent:tent.id,alive:true,cult:1};S.camps.push(c);
+  const n=6+Math.min(4,Math.floor(S.day/40));
+  for(let k=0;k<n;k++){const t=k===0?'haydutreis':k%3===0?'haydutokcu':'haydut';
+   const u=mkUnit(t,'b',x+0.5+(k%3)-1+0.3,y+2.5+(k/3|0),{guard:1,hx:x+1,hy:y+3,st:'idle'});u.hp=u.mhp=Math.round(u.mhp*(k===0?3.5:1.9));u.ds=1.9;u.cult=1;if(k===0)u.nm='Kül Rahibi';}
+  revealC(x,y,4);E.cultMade=(E.cultMade||0)+1;
+  log('🔥 Kül Tarikatı bir kamp kurdu!',x,y);return c;
+ }
+ return null;
+}
 function egCultRaid(){
  const E=egS(),tc=mainTC();if(!tc)return;
- const n=clamp(8+Math.floor(S.day/14)+S.rank*2,10,40);
- const side=Math.floor(Math.random()*4);
- const bx=[6,MW-8,MW/2,MW/2][side],by=[MH/2,MH/2,6,MH-8][side];
- const p=egFindWalk(bx,by,16)||egFindWalk(MW/2,MH/2,40);if(!p)return;
+ const cs=S.camps.filter(c=>c.alive&&c.cult);if(!cs.length)return;
+ const c=pick(cs),n=clamp(6+Math.floor(S.day/16)+S.rank,8,22);
  for(let i=0;i<n;i++){const t=i%5===0?'haydutatli':i%2?'haydutokcu':'haydutreis';
-  const u=mkUnit(t,'b',p.x+(i%6)*0.7,p.y+(i/6|0)*0.7,{st:'raid',gt:tc.id});u.hp=u.mhp=Math.round(u.mhp*2.0);u.ds=1.8;}
- log('🔥 KÜL TARİKATI baskını! '+n+' fanatik köyüne yürüyor.',p.x,p.y);
+  const u=mkUnit(t,'b',c.x+(i%6)*0.7,c.y+2+(i/6|0)*0.7,{st:'raid',gt:tc.id});u.hp=u.mhp=Math.round(u.mhp*1.9);u.ds=1.8;u.cult=1;}
+ log('🔥 Kül Tarikatı kampından '+n+' fanatik köyüne yürüyor!',c.x,c.y);
+}
+function egSponsor(){
+ const E=egS();if(E.sponsor!=null)return;
+ let a=S.kings.map((k,i)=>i).filter(i=>!S.kings[i].dead&&!S.kings[i].vassal);
+ if(!a.length){E.sponsor=-1;return;}
+ let i=a.find(i=>/Doğu/i.test(KINGS[i].n));if(i==null)i=a[0];
+ E.sponsor=i;const K=KINGS[i],k=S.kings[i];
+ const spies=typeof spS==='function'&&spS().list.length>0;
+ revealC(K.x,K.y,10);
+ k.war=true;k.pw=1;k.lastWar=S.day;k.pact=null;k.rel=Math.min(k.rel,-60);
+ showModal('🕵 Gizli Rapor',(spies?'Casusların aylardır izlediği bir iz sonunda doğruladı:':'Yakalanan bir tarikat habercisi sorgulandı:')+'\n\n"Kül Tarikatı'+"'"+'nı '+K.n+' ('+K.who+') besliyor. Altın, silah ve sığınak onlardan geliyor. Maldric de aslında bu krallığın piyonuydu."\n\n'+K.n+' artık seninle savaşta. Onu yok et ya da vasal yap: tarikat sonsuza dek susacak.',[{t:'Kararlıyım'}]);
+ log('📜 Kül Tarikatı\'nın arkasında '+K.n+' var. Onu yok et!',K.x,K.y);
+}
+function egCultEnd(by){
+ const E=egS();if(E.cultEnded)return;E.cultEnded=1;
+ S.units.forEach(u=>{if(u.cult&&!u.dead)killU(u);});
+ S.camps.forEach(c=>{if(c.cult&&c.alive){c.alive=false;const b=BM.get(c.tent);if(b)destroyB(b,null);}});
+ addRes('gold',2500);addRes('iron',500);
+ if(typeof META!=='undefined'&&!S.test){META.pts+=3;saveMeta();}
+ S.won=true;
+ showModal('🏆 ZAFER: Kül Tarikatı Sona Erdi','Destekçisi '+(by==='vassal'?'boyun eğince':'yıkılınca')+' Kül Tarikatı\'nın tüm bağları koptu. Kamplar söndü, fanatikler dağıldı. Aldora\'nın Mirası artık güvende.\n\nÖdül: 2500 altın, 500 demir, +3 miras puanı.\n\nOyunu burada bitirip skorunu kaydedebilir ya da krallığını yönetmeye devam edebilirsin.',[
+  {t:'Devam et (serbest oyun)'},
+  {t:'Bitir ve skoru kaydet',fn:()=>{S.done=true;if(typeof recScore==='function')recScore();showModal('📜 Efsane Tamamlandı','Skorun kaydedildi. Ana menüden yeni bir oyuna başlayabilirsin.',[{t:'Yeni oyun',fn:()=>{try{localStorage.removeItem('ky_save');}catch(e){}newGameSetup(uiReset);}}]);}}]);
 }
 // ---- kaçak lider (mini patron) ----
 function egBoss(i){
@@ -118,7 +159,15 @@ function egDay(){
  if(!S.founded)return;
  const E=egS();
  if(S.sf&&S.sf.maldricDead&&!E.act2)egStartAct2();
- if(E.act2&&S.day>=E.nextCult){E.nextCult=S.day+Math.max(8,18-Math.floor(S.rank*2));egCultRaid();}
+ if(E.act2&&!E.cultEnded){
+  const alive=S.camps.filter(c=>c.alive&&c.cult).length;
+  if(!E.cultMade&&S.day>=E.act2Day+4)egCultCamp();
+  else if(E.cultMade&&alive<2&&(E.cultMade||0)<5&&S.day>=(E.nextCamp||E.act2Day+45)){E.nextCamp=S.day+ri(45,70);if(Math.random()<0.8)egCultCamp();}
+  if(alive&&S.day>=E.nextCult){E.nextCult=S.day+ri(26,40);egCultRaid();}
+  if(E.sponsor==null&&S.day>=E.act2Day+40&&!UI.modalOpen)egSponsor();
+  if(E.sponsor!=null&&E.sponsor>=0){const k=S.kings[E.sponsor];if(k.dead||k.vassal)egCultEnd(k.vassal&&!k.dead?'vassal':'dead');}
+  else if(E.sponsor===-1)egCultEnd('dead');
+ }
  (E.pendB||[]).slice().forEach(p=>{if(S.day>=p.at){E.pendB.splice(E.pendB.indexOf(p),1);if(E.bosses.length<8)egBoss(p.i);}});
  if(S.day>=45){
   if(!E.nextDis)E.nextDis=S.day+ri(20,30);

@@ -126,7 +126,7 @@ function plotRes(key,how){
 })();
 function intrigueDay(){
  if(!S.founded)return;const P=spS();
- P.q=P.q.filter(q=>{if(S.day>=q.at){if(P.list.length<spCap()){const tr=pick(['sessiz','zeki','zehirli',null,null]);P.list.push({id:P.nid++,nm:pick(SPN),lv:1,xp:0,tr,busy:0});log('🕵 Yeni casus hazır: '+P.list[P.list.length-1].nm+(tr?' ('+STR[tr].n+')':'')+'.');}return false;}return true;});
+ P.q=P.q.filter(q=>{if(S.day>=q.at){if(P.list.length<spCap()){const tr=pick(['sessiz','zeki','zehirli',null,null]);P.list.push({id:P.nid++,nm:pick(SPN),lv:S.techs.golge?2:1,xp:0,tr,busy:0});log('🕵 Yeni casus hazır: '+P.list[P.list.length-1].nm+(tr?' ('+STR[tr].n+')':'')+'.');}return false;}return true;});
  P.mis.slice().forEach(mi=>{if(S.day>=mi.end){P.mis.splice(P.mis.indexOf(mi),1);misResolve(mi);}});
  const E=S.eg=S.eg||{};
  if(!E.nextPlot&&S.age>=1)E.nextPlot=S.day+ri(10,18);
