@@ -71,7 +71,7 @@ function egCultRaid(){
 }
 function egSponsor(){
  const E=egS();if(E.sponsor!=null)return;
- let a=S.kings.map((k,i)=>i).filter(i=>!S.kings[i].dead&&!S.kings[i].vassal);
+ let a=S.kings.map((k,i)=>i).filter(i=>i<6&&!S.kings[i].dead&&!S.kings[i].vassal);
  if(!a.length){E.sponsor=-1;return;}
  let i=a.find(i=>/Doğu/i.test(KINGS[i].n));if(i==null)i=a[0];
  E.sponsor=i;const K=KINGS[i],k=S.kings[i];
@@ -140,7 +140,7 @@ function egDisaster(){
 // ---- 3 son ----
 function egEnds(){
  const E=egS();if(!(S.sf&&S.sf.maldricDead))return;
- const kd=S.kings.map(k=>k);
+ const kd=S.kings.slice(0,6);
  const allDead=kd.every(k=>k.dead);
  const allBound=kd.every(k=>k.dead?false:(k.vassal||k.pact==='ittifak'));
  if(!E.ends.fetih&&allDead){E.ends.fetih=1;showModal('⚔ SON: FETİH','Hiçbir krallık ayakta kalmadı. Aldora\'nın bayrağı bütün topraklarda dalgalanıyor. Korkuyla örülmüş bir barış...\n\nOyun devam ediyor; istersen yeni hedefler seç.',[{t:'Devam'}]);}

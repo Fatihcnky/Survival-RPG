@@ -3,8 +3,8 @@
 let S=null;
 let UM=new Map(),BM=new Map();
 let T,RA,ROAD,OCC,FOG=new Uint8Array(MW*MH);
-const NN=MW*MH;
-const UNRE=new Float32Array(NN);
+let NN=MW*MH;
+let UNRE=new Float32Array(NN);
 const FX=[];
 let pathBudget=10,SEEN=null;
 const rand=Math.random;
@@ -29,7 +29,7 @@ function walk(x,y){
  return t!==1&&!(t>=3&&t<=5)&&(OCC[i]===0||(PTF&&GATE[i]===1));
 }
 // --- sıkışma kontrolü: küçük kapalı boşlukta mı? (dolgu ile en çok 90 kare) ---
-const tpS=new Int32Array(NN);let tpStamp=0;const tpQ=new Int32Array(120);
+let tpS=new Int32Array(NN);let tpStamp=0;const tpQ=new Int32Array(120);
 function trappedAt(x,y,extra){
  x=Math.floor(x);y=Math.floor(y);if(!inMap(x,y))return false;
  tpStamp++;let h=0,t=0,n=0;const st=y*MW+x;tpQ[t++]=st;tpS[st]=tpStamp;
@@ -85,7 +85,7 @@ function hostile(a,b){
  if((x==='k'&&y==='b')||(x==='b'&&y==='k'))return false;
  return true;
 }
-const GC=8,GW=Math.ceil(MW/GC);let UGR=null,BGR=null,ugT=-9;
+const GC=8;let GW=Math.ceil(MW/GC);let UGR=null,BGR=null,ugT=-9;
 function rebuildGrid(){
  UGR=new Array(GW*GW);BGR=new Array(GW*GW);ugT=S.t;
  for(const o of S.units){if(o.dead)continue;const k=((o.y/GC)|0)*GW+((o.x/GC)|0);(UGR[k]||(UGR[k]=[])).push(o);}
@@ -124,7 +124,7 @@ function mkB(t,team,x,y,done,extra){
 }
 
 // --- yol bulma (A*) ---
-const gS=new Float32Array(NN),par=new Int32Array(NN),vis=new Int32Array(NN),clo=new Int32Array(NN);
+let gS=new Float32Array(NN),par=new Int32Array(NN),vis=new Int32Array(NN),clo=new Int32Array(NN);
 let stamp=0;
 const DX=[1,-1,0,0,1,1,-1,-1],DY=[0,0,1,-1,1,-1,1,-1];
 function findPath(sx,sy,gx,gy,gw,gh,ex,partial){

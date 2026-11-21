@@ -126,6 +126,7 @@ function draw(){
  const sn=seas();
  const xa=Math.max(0,Math.floor(x0)),xb=Math.min(MW-1,Math.ceil(x0+vw)),ya=Math.max(0,Math.floor(y0)),yb=Math.min(MH-1,Math.ceil(y0+vh));
  for(let y=ya;y<=yb;y++)for(let x=xa;x<=xb;x++){const f=FOG[y*MW+x];if(f===0){ctx.fillStyle='#05080b';ctx.fillRect(x,y,1.03,1.03);continue;}drawTile(x,y,sn);}
+ if(typeof regionTint==='function')regionTint(xa,xb,ya,yb);
  // krallık sınırları
  ctx.lineWidth=0.1;
  KINGS.forEach((k,i)=>{if(S.kings[i].dead||fogAt(k.x,k.y)===0)return;ctx.strokeStyle=k.col+'88';ctx.beginPath();ctx.arc(k.x,k.y,22,0,6.3);ctx.stroke();});

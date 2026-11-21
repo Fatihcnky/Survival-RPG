@@ -1,6 +1,6 @@
 'use strict';
 // ===== SABİTLER VE VERİ TABLOLARI =====
-const TS=32,MW=224,MH=224,DAY=110,SL=[16,16,16,18];let YEARD=66;
+let MW=224,MH=224;const TS=32,DAY=110,SL=[16,16,16,18];let YEARD=66;
 // ===== ZORLUK =====
 const DIFFS={
  kolay:{n:'Kolay',ic:'🌱',sub:'Huzurlu Krallık',sl:[18,16,16,12],res:1.6,prod:1.25,cold:0.6,raid:0.6,rf:1.4,war:0.4,k:0.8,

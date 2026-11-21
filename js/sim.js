@@ -329,22 +329,33 @@ function soldiers(){return S.units.filter(u=>u.team==='p'&&!u.dead&&UT[u.t].mil)
 function saveGame(key){
  try{
   const o=JSON.stringify(S,(k,v)=>k==='path'?undefined:v);
-  localStorage.setItem(key||'ky_save',JSON.stringify({s:o,T:Array.from(T).join(''),RA:Array.from(RA,v=>Math.round(v)).join(','),R:Array.from(ROAD).join(''),F:Array.from(FOG).join('')}));
+  localStorage.setItem(key||'ky_save',JSON.stringify({v:2,w:MW,h:MH,s:o,T:rleEnc(T),RA:rleEnc(RA,true),R:rleEnc(ROAD),F:rleEnc(FOG)}));
   return true;
  }catch(e){return false;}
 }
+function rleEnc(a,round){const o=[];let p=round?Math.round(a[0]):a[0],n=1;for(let i=1;i<a.length;i++){const v=round?Math.round(a[i]):a[i];if(v===p)n++;else{o.push(p+'x'+n);p=v;n=1;}}o.push(p+'x'+n);return o.join(',');}
+function rleDec(s,C){let len=0;const parts=s.split(',');for(const t of parts)len+=+t.slice(t.indexOf('x')+1);const a=new C(len);let i=0;for(const t of parts){const k=t.indexOf('x'),v=+t.slice(0,k),n=+t.slice(k+1);if(v)a.fill(v,i,i+n);i+=n;}return a;}
 function loadGame(key){
  try{
   const raw=localStorage.getItem(key||'ky_save');if(!raw)return false;
   const d=JSON.parse(raw);
   const S2=JSON.parse(d.s);
-  if(d.T.length!==NN||!S2.dyn)return false;
-  S=S2;applyDiff();RES.forEach(k=>{if(S.res[k]==null)S.res[k]=0;});
-  T=Uint8Array.from(d.T.split('').map(Number));
-  RA=Float32Array.from(d.RA.split(',').map(Number));
-  ROAD=Uint8Array.from(d.R.split('').map(Number));
+  if(!S2.dyn)return false;
+  const lw=d.w||224,lh=d.h||224;
+  if(typeof setWorld==='function'){setWorld(lw,lh,false);worldRestoreKings(S2);}
+  if(d.v===2){
+   if(lw*lh!==NN)return false;
+   S=S2;applyDiff();RES.forEach(k=>{if(S.res[k]==null)S.res[k]=0;});
+   T=rleDec(d.T,Uint8Array);RA=rleDec(d.RA,Float32Array);ROAD=rleDec(d.R,Uint8Array);FOG=rleDec(d.F,Uint8Array);
+  }else{
+   if(d.T.length!==NN)return false;
+   S=S2;applyDiff();RES.forEach(k=>{if(S.res[k]==null)S.res[k]=0;});
+   T=Uint8Array.from(d.T.split('').map(Number));
+   RA=Float32Array.from(d.RA.split(',').map(Number));
+   ROAD=Uint8Array.from(d.R.split('').map(Number));
+   FOG=d.F?Uint8Array.from(d.F.split('').map(Number)):new Uint8Array(NN).fill(1);
+  }
   OCC=new Int32Array(NN);GATE=new Uint8Array(NN);
-  FOG=d.F?Uint8Array.from(d.F.split('').map(Number)):new Uint8Array(NN).fill(1);
   UM=new Map();BM=new Map();
   for(const b of S.blds){BM.set(b.id,b);fillOcc(b,b.id);}
   for(const u of S.units){u.path=null;u.st=u.team==='p'&&u.t==='koylu'?'idle':(u.st==='raid'?'raid':'idle');u.wait=Math.random()*0.5;UM.set(u.id,u);}
