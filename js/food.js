@@ -12,7 +12,7 @@ function ftRate(k){if(k==='ekmek'){return S.fb||0;}const a=(S.fp&&S.fp[k])||0,b=
 function foodRow(){
  let h='';
  for(const [k,ic,n] of FTYPES){
-  if(k==='ekmek'){const v=Math.floor(S.res.ekmek||0);if(!v&&!S.fv.ekmek)continue;h+='<span class="chip sub" data-a="tab" data-v="res">'+ic+'<b>'+v+'</b></span>';continue;}
+  if(k==='ekmek')continue;
   const r=ftRate(k);if(!r&&!(S.fv&&S.t-(S.fv[k]||-1e9)<DAY*1.5))continue;
   h+='<span class="chip sub" data-a="tab" data-v="res">'+ic+'<b>+'+Math.round(r)+'</b></span>';
  }
@@ -21,7 +21,7 @@ function foodRow(){
 function foodPanel(){
  let h='<h4>🍽 Yiyecek çeşitleri <small>(son günün üretimi)</small></h4><div class="flow">';
  for(const [k,ic,n] of FTYPES){
-  if(k==='ekmek'){h+='<div class="fr"><span>'+ic+' '+n+'</span><span>stok '+Math.floor(S.res.ekmek||0)+'</span></div>';continue;}
+  if(k==='ekmek')continue;
   h+='<div class="fr"><span>'+ic+' '+n+'</span><span>+'+Math.round(ftRate(k)*10)/10+' /gün</span></div>';
  }
  return h+'</div><small>Toplam yiyecek ortak depoda tutulur. Çeşit arttıkça halk daha mutlu olur.</small>';

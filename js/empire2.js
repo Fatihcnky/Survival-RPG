@@ -104,7 +104,7 @@ function logiDay(){
  const friends=KINGS.map((K,i)=>({K,i})).filter(o=>S.kings[o.i]&&!S.kings[o.i].dead&&(S.kings[o.i].vassal||S.kings[o.i].pact==='ittifak'));
  let n=0;
  S.units.forEach(u=>{if(u.dead||u.team!=='p'||!UT[u.t].mil||u.t==='kahraman')return;
-  const ok=bases.some(b=>Math.hypot(u.x-b.x,u.y-b.y)<(b.t==='tc'?85:75))||friends.some(o=>Math.hypot(u.x-o.K.x,u.y-o.K.y)<32);
+  const ok=bases.some(b=>Math.hypot(u.x-b.x,u.y-b.y)<(b.t==='tc'?85:75))||friends.some(o=>Math.hypot(u.x-o.K.x,u.y-o.K.y)<70)||S.blds.some(b=>b.team==='p'&&!b.decor&&Math.hypot(u.x-b.x,u.y-b.y)<28);
   if(!ok){u.hp-=u.mhp*0.04;n++;if(u.hp<=1)u.hp=1;}});
  if(n)log('⚠ '+n+' asker ikmalsiz yıpranıyor! İkmal Kampı kur ya da geri dön.');
 }
@@ -126,8 +126,12 @@ function worldDay(){
  // 80. gün: Karşı Taç
  if(t>=80&&!W.ev.taç&&!UI.modalOpen){W.ev.taç=1;
   const p=egFindWalk(MW*0.5,MH*0.45,50,30);
-  if(p){const b=mkUnit('haydutreis','b',p.x,p.y,{guard:1,hx:p.x,hy:p.y,st:'idle'});b.hp=b.mhp=Math.round(b.mhp*9);b.ds=3;b.nm='Karşı Taç (Sahte İmparator)';b.boss=1;
-   for(let k=0;k<12;k++){const u=mkUnit(k%2?'haydutokcu':'haydutatli','b',p.x+1+k%4*0.8,p.y+1+(k/4|0)*0.8,{guard:1,hx:p.x,hy:p.y,st:'idle'});u.hp=u.mhp=Math.round(u.mhp*2.2);u.ds=2;}
+  if(p){for(let dy=-5;dy<=7;dy++)for(let dx=-6;dx<=8;dx++){const X=p.x+dx,Y=p.y+dy;if(inMap(X,Y)&&OCC[Y*MW+X]===0&&T[Y*MW+X]!==0){T[Y*MW+X]=0;RA[Y*MW+X]=0;}}
+   const tents=[[0,0],[-5,-3],[5,-3],[-5,4],[5,4]].map(o=>walkRect(p.x+o[0],p.y+o[1],2,2)?mkB('tent','b',p.x+o[0],p.y+o[1],true):null).filter(Boolean);
+   tents.forEach(t=>{t.hp=t.mhp=Math.round((t.mhp||200)*3);});
+   if(tents[0])S.camps.push({id:S.camps.length+1,x:p.x,y:p.y,tent:tents[0].id,alive:true,claim:1});
+   const b=mkUnit('haydutreis','b',p.x+0.5,p.y+2.5,{guard:1,hx:p.x,hy:p.y,st:'idle'});b.hp=b.mhp=Math.round(b.mhp*14);b.ds=3.2;b.nm='Karşı Taç (Sahte İmparator)';b.boss=1;
+   for(let k=0;k<30;k++){const u=mkUnit(k%3===0?'haydutokcu':k%3===1?'haydutatli':'haydut','b',p.x+1+k%6*0.8,p.y+3+(k/6|0)*0.8,{guard:1,hx:p.x,hy:p.y,st:'idle'});u.hp=u.mhp=Math.round(u.mhp*2.6);u.ds=2.3;}
    S.eg=S.eg||{};S.eg.bosses=S.eg.bosses||[];S.eg.bosses.push({id:b.id,x:p.x,y:p.y,n:'Karşı Taç',done:0,pres:15});revealC(p.x,p.y,6);
    showModal('👑 Aldora\'nın Sırrı','Kadim kalıntılardaki kehanet bir sahtekârın eline geçmiş: "Aldora\'nın gerçek varisi benim" diyen bir adam, bir ordu toplayıp yeni dünyada kendi tacını ilan etti. İmparatorluğunu tanımayacak.\n\nOnu bul ve yenip tacı elinden al. Haritada işaretlendi.',[{t:'Kehaneti bozacağım'}]);}}
  // 120. gün: Büyük Kıtlık

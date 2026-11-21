@@ -20,10 +20,11 @@ function rulerSk(k){const p=S.dyn&&personOf('ruler');return (p&&p.sk&&p.sk[k])||
   const before=new Set(S.units.map(u=>u.id));_sc(i);
   const cv=S.units.find(u=>u.t==='kervan'&&!before.has(u.id));if(!cv)return;
   cv.esc=0;
-  showModal('🐫 Kervan Yola Çıktı',KINGS[i].n+' kervanı sana geliyor. Yolda pusu olabilir. Önlem al:',[
-   {t:'Muhafız gönder (80💰)',fn:()=>{if(S.res.gold>=80&&!cv.dead){S.res.gold-=80;cv.esc=1;const K=KINGS[i];for(let j=0;j<4;j++)mkUnit(j%2?'okcu':'mizrakli','a',cv.x+j*0.3,cv.y+0.4,{life:DAY*4,st:'idle',follow:cv.id,hx:cv.x,hy:cv.y});log('🛡 4 muhafız kervana eşlik ediyor.');}else log('⛔ Altın yetersiz.');}},
-   {t:'Sigortala (50💰)',fn:()=>{if(S.res.gold>=50&&!cv.dead){S.res.gold-=50;cv.ins=1;log('📜 Kervan sigortalandı: kaybolursa 150 altın geri ödenir.');}else log('⛔ Altın yetersiz.');}},
-   {t:'Kendi haline bırak'}]);
+  const mil=awayAvail(),nb=4+Math.floor(S.day/40),base=Math.max(0.05,0.42-Math.min(0.15,mil*0.004));
+  const btns=[4,8,14,22].filter(n=>n<=mil||(n===4&&mil>=2)).map(n0=>{const n=Math.min(n0,mil);return {t:'🛡 '+n+' asker gönder (%'+Math.round(100*(1-base+base*escWin(n,nb)))+' ulaşır)',fn:()=>{if(cv.dead||cv.escN)return;const sn=awayTake(n);if(!sn.length){log('⛔ Asker yok.');return;}cv.escN=sn.length;cv.escS=sn;cv.esc=1;log('🛡 '+sn.length+' asker kervana eşlik ediyor (ordudan ayrıldı).');}};});
+  btns.push({t:'Sigortala (50💰)',fn:()=>{if(S.res.gold>=50&&!cv.dead){S.res.gold-=50;cv.ins=1;log('📜 Kervan sigortalandı: kaybolursa 150 altın geri ödenir.');}else log('⛔ Altın yetersiz.');}});
+  btns.push({t:'Kendi haline bırak ('+'%'+Math.round(100*(1-base))+' ulaşır)'});
+  showModal('🐫 Kervan Yola Çıktı',KINGS[i].n+' kervanı sana geliyor. Yolda pusu olabilir (yaklaşık %'+Math.round(base*100)+'). Ne kadar çok asker eşlik ederse ulaşma şansı o kadar artar; ama askerler ordundan ayrılır, dönerken kimi yaralı olur, kimi ölebilir.',btns);
  };
  const _uc=updCaravan;updCaravan=function(u,dt){
   _uc(u,dt);
@@ -31,12 +32,17 @@ function rulerSk(k){const p=S.dyn&&personOf('ruler');return (p&&p.sk&&p.sk[k])||
   if(u.dead||u.amb)return;const tc=mainTC();if(!tc)return;
   const d=Math.hypot(u.x-tc.x,u.y-tc.y);
   if(d<32&&d>12){u.amb=1;
-   const chance=0.42-(u.esc?0.28:0)-Math.min(0.15,S.units.filter(x=>!x.dead&&x.team==='p'&&UT[x.t].mil).length*0.004);
-   if(Math.random()<chance){const n=4+Math.floor(S.day/40);for(let j=0;j<n;j++){const p=egFindWalk(u.x,u.y,6);if(!p)break;const h=mkUnit(j%2?'haydutokcu':'haydut','b',p.x,p.y,{st:'idle'});h.ds=1.3;h.hp=h.mhp=Math.round(h.mhp*1.3);}
-    log('🥷 Kervana pusu kuruldu! '+n+' haydut yolu kesti.',u.x,u.y);}
+   const chance=0.42-Math.min(0.15,awayAvail()*0.004),nb=4+Math.floor(S.day/40);
+   if(Math.random()<chance){
+    if(u.escN){const win=Math.random()<escWin(u.escN,nb);
+     if(win){u.escLoss=1;log('🛡 Pusu püskürtüldü! Eskort '+nb+' haydudu dağıttı.',u.x,u.y);}
+     else{u.escLoss=2;log('💥 Eskort ezildi, kervan yağmalandı!',u.x,u.y);killU(u);}}
+    else{for(let j=0;j<nb;j++){const p=egFindWalk(u.x,u.y,6);if(!p)break;const h=mkUnit(j%2?'haydutokcu':'haydut','b',p.x,p.y,{st:'idle'});h.ds=1.3;h.hp=h.mhp=Math.round(h.mhp*1.3);}
+     log('🥷 Kervana pusu kuruldu! '+nb+' haydut yolu kesti.',u.x,u.y);}}
   }
+  if(u.dead&&u.escS&&!u.escDone)escReturn(u);
  };
- const _ku=killU;killU=function(u,a){if(u&&u.t==='kervan'&&u.ins&&!u.dead&&u.team==='a'&&u.life>0){addRes('gold',150);log('📜 Sigorta: 150 altın ödendi.');}return _ku(u,a);};
+ const _ku=killU;killU=function(u,a){if(u&&u.t==='kervan'&&u.escS&&!u.escDone){setTimeout(()=>escReturn(u),0);}if(u&&u.t==='kervan'&&u.ins&&!u.dead&&u.team==='a'&&u.life>0){addRes('gold',150);log('📜 Sigorta: 150 altın ödendi.');}return _ku(u,a);};
 })();
 // ---- vasal müdahaleleri ----
 function vdev(i){return (S.kings[i].dev||0);}
@@ -62,7 +68,7 @@ function vasalReq(i){
   {t:'Haracı iste (+80💰)',fn:()=>{addRes('gold',80);k.loy=Math.max(0,(k.loy||55)-12);}},
   {t:'Yoksay',fn:()=>{k.loy=Math.max(0,(k.loy||55)-8);}}]);
  else if(kind==='komsu')showModal('📨 '+K.n+' (vasal)',K.who+': "Bir haydut sürüsü sınırımızda. Asker gönderirsen ya da kendimiz hallederiz?"',[
-  {t:'Asker gönder (6 asker, 2 gün)',fn:()=>{k.loy=Math.min(100,(k.loy||55)+12);k.dev=Math.min(3,vdev(i)+(Math.random()<0.3?1:0));log('⚔ Vasalının sorunu çözüldü.');}},
+  ...[5,10,20].filter(n=>n<=awayAvail()||n===5&&awayAvail()>=2).map(n0=>{const n=Math.min(n0,awayAvail());return {t:'Asker gönder ('+n+' asker, 3 gün, %'+Math.round(escWin(n,6+Math.floor(S.day/20))*100)+' başarı)',fn:()=>{const sn=awayTake(n);if(!sn.length)return;S.away=S.away||[];S.away.push({at:S.day+3,sn,i,thr:6+Math.floor(S.day/20)});log('⚔ '+n+' asker '+K.n+' topraklarına gönderildi (ordudan ayrıldı).');}};}),
   {t:'Kendin halledin',fn:()=>{const d=dice(null,12,0);if(d.m>=0)log('🛡 '+K.n+' tehdidi kendi başına savuşturdu.');else{k.loy=Math.max(0,(k.loy||55)-10);const kd=kdOf(i);if(kd)kd.food=Math.round(kd.food*0.6);log('💥 '+K.n+' yağmalandı, sadakat düştü.');}}}]);
  else showModal('📨 '+K.n+' (vasal)',K.who+'\'in veziri gizlice geldi: "Kralımız son zamanlarda çevresine senden şikâyet ediyor." Ne yapacaksın?',[
   {t:'Vezire rüşvet (100💰)',fn:()=>{if(S.res.gold>=100){S.res.gold-=100;k.loy=Math.min(100,(k.loy||55)+8);k.warn=0;}}},

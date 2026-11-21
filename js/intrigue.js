@@ -8,7 +8,9 @@ const MIS={
  gozet:{n:'Gözetle',ic:'🔎',days:3,dc:8,cost:80,age:1},
  sab:{n:'Sabotaj',ic:'🔥',days:5,dc:13,cost:200,age:1},
  sv:{n:'Veliaht Suikastı',ic:'🗡',days:12,dc:15,cost:600,age:3,lv:2},
- sk:{n:'Kral Suikastı',ic:'☠',days:16,dc:18,cost:1000,age:3,lv:2}
+ sk:{n:'Kral Suikastı',ic:'☠',days:16,dc:18,cost:1000,age:3,lv:2},
+ vden:{n:'Sadakat Denetimi',ic:'🔍',days:4,dc:10,cost:100,age:1,v:1},
+ vagt:{n:'Ajan Ağı',ic:'🕸',days:6,dc:12,cost:200,age:1,v:1}
 };
 function spS(){S.spy=S.spy||{list:[],q:[],nid:1,mis:[],seen:{}};return S.spy;}
 function spCap(){return Math.min(9,countB('casusevi',true)*3);}
@@ -32,7 +34,7 @@ function misBonus(m,s,i){
 }
 function misStart(m,i){
  const M=MIS[m],K=KINGS[i],k=S.kings[i],P=spS();
- if(!k||k.dead||k.vassal||S.age<M.age||S.res.gold<M.cost)return;
+ if(!k||k.dead||!!k.vassal!==!!M.v||S.age<M.age||S.res.gold<M.cost)return;
  const s=bestSpy(m);if(!s||(M.lv&&s.lv<M.lv))return;
  S.res.gold-=M.cost;s.mission={m,i,end:S.day+M.days};P.mis.push({sid:s.id,m,i,end:S.day+M.days});
  log('🕵 '+s.nm+' → '+K.n+': '+M.n+' ('+M.days+' gün).');updPanel(true);
@@ -52,7 +54,15 @@ function misResolve(mi){
  if(k.dead){s.busy=S.day+2;return;}
  const dr=dice(s,M.dc,misBonus(mi.m,s,mi.i)),m=dr.m;let t='',ttl=M.ic+' '+M.n+': '+K.n,lost=false;
  const kd=kdOf(mi.i)||{};
- if(mi.m==='gozet'){
+ if(mi.m==='vden'){
+  if(m>=0){k.loy=Math.min(100,(k.loy==null?55:k.loy)+8);k.lowDays=0;k.warn=0;xpUp(s,1);t='Vasalın içi gözden geçirildi. Sadakat: '+Math.round(k.loy)+' (+8).'+(m>=5?'\n✔ Gizli bir isyan hazırlığı ortaya çıkarıldı: 30 gün isyan çıkmaz.':'');if(m>=5)k.noRev=S.day+30;}
+  else if(m>-5)t='Casus işe yarar bir şey bulamadı.';
+  else{t='Casus yakalandı! '+K.who+' güvensizlik yüzünden öfkeli (sadakat -12).';lost=true;k.loy=Math.max(0,(k.loy==null?55:k.loy)-12);}
+ }else if(mi.m==='vagt'){
+  if(m>=0){k.agent=S.day+40;xpUp(s,2);t='Vasal sarayında ajan ağı kuruldu (40 gün): günde +12 altın, sadakat yavaş düşer.';}
+  else if(m>-5)t='Ağ kurulamadı.';
+  else{t='Ajanlar yakalandı! Vasal sana güvenmiyor (sadakat -15).';lost=true;k.loy=Math.max(0,(k.loy==null?55:k.loy)-15);}
+ }else if(mi.m==='gozet'){
   if(m>=0){revealC(K.x,K.y,12);P.seen[mi.i]=S.day+25;const sol=kUnits(mi.i,u=>UT[u.t].mil).length;
    t='Başarılı! '+K.who+' ('+(K.n)+')\nAsker: '+sol+'\nNüfus: '+(kd.pop||'?')+'\nYiyecek: '+Math.round(kd.food||0)+'\nSavaş: '+(k.war?'evet':'hayır')+' · İlişki: '+Math.round(k.rel)+(m>=5?'\n✔ Derin keşif: bu krallığa sonraki görevlerde +2 şans (25 gün).':'');xpUp(s,1);}
   else if(m>-5){t='Casus yeterince bilgi toplayamadı.';}
@@ -139,9 +149,9 @@ function spyBlock(){
  let h='<h4>🕵 Casus Evi</h4><small>Zar: d20 + casus Sv×2 + çevre ('+(envBonus()>=0?'+':'')+envBonus()+': olgun hükümdar, halk mutluluğu, bilge)</small>';
  h+='<div class="row">'+btn('➕ Casus yetiştir (120💰 40🍖)','spytrain',null,P.list.length+P.q.length>=spCap()||S.res.gold<120||S.res.food<40)+'<small>'+P.list.length+'/'+spCap()+(P.q.length?' · '+P.q.length+' eğitimde':'')+'</small></div>';
  P.list.forEach(s=>{h+='<div style="font-size:12px;margin:2px 0">🕵 <b>'+s.nm+'</b> Sv.'+s.lv+' <small>('+(s.xp||0)+'/'+s.lv*3+' xp'+(s.tr?' · '+STR[s.tr].n:'')+')</small> — '+(s.mission?'görevde: '+KINGS[s.mission.i].n.split(' ')[0]+' ('+Math.max(0,s.mission.end-S.day)+' gün)':(s.busy>S.day?'dinleniyor ('+(s.busy-S.day)+' gün)':'<span style="color:#9be59b">boşta</span>'))+'</div>';});
- KINGS.forEach((K,i)=>{const k=S.kings[i];if(k.dead||k.vassal)return;
-  let r='<div class="row"><b style="color:'+K.col+'">'+K.n.split(' ')[0]+'</b> ';
-  Object.keys(MIS).forEach(m=>{const M=MIS[m];if(S.age<M.age)return;const s=bestSpy(m),ok=s&&(!M.lv||s.lv>=M.lv)&&S.res.gold>=M.cost;
+ KINGS.forEach((K,i)=>{const k=S.kings[i];if(k.dead)return;
+  let r='<div class="row"><b style="color:'+K.col+'">'+K.n.split(' ')[0]+(k.vassal?' 👑':'')+'</b> ';
+  Object.keys(MIS).forEach(m=>{const M=MIS[m];if(!!k.vassal!==!!M.v||S.age<M.age)return;const s=bestSpy(m),ok=s&&(!M.lv||s.lv>=M.lv)&&S.res.gold>=M.cost;
    const od=s?Math.round(pOdds(M.dc,misBonus(m,s,i))*100):0;
    r+=btn(M.ic+' '+M.n+' '+(s?'%'+od:'')+' ('+M.cost+'💰)','ms',i,!ok,m);});
   h+=r+'</div>';});

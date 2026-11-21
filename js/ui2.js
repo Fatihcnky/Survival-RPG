@@ -30,9 +30,11 @@ function questBox(){
 }
 function updHud(){
  let h='<div class="row1">';
- if(S.founded)RES.forEach(k=>{if(HIDE0[k]&&S.res[k]<0.5)return;h+=chip(k);});
+ const MAINR=['food','wood','stone','iron','gold'],hx=!!UI.hudX;
+ if(S.founded)RES.forEach(k=>{if(!hx&&!MAINR.includes(k))return;if(HIDE0[k]&&S.res[k]<0.5)return;h+=chip(k);});
  else['food','wood','stone','gold'].forEach(k=>{h+=chip(k);});
- h+='</div>'+(S.founded&&S.fv?foodRow():'')+'<div class="row2">';
+ if(S.founded)h+='<span class="chip" data-a="hudx" title="Kaynakları aç/kapat">'+(hx?'▲':'▼')+'</span>'+(hx?'<span class="chip" data-a="tab" data-v="res">📊 Detay</span>':'');
+ h+='</div>'+(S.founded&&S.fv&&hx?foodRow():'')+'<div class="row2">';
  const td=(S.t%DAY)/DAY,night=td>0.78||td<0.06,hp=Math.round(S.happy);
  h+='<span class="chip">👥<b>'+popNow()+'/'+popCap()+'</b></span>';
  h+='<span class="chip">'+(hp>=65?'😄':hp>=40?'🙂':hp>=20?'😟':'😡')+'<b>'+hp+'</b></span>';
