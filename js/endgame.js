@@ -88,9 +88,9 @@ function egCultEnd(by){
  addRes('gold',2500);addRes('iron',500);
  if(typeof META!=='undefined'&&!S.test){META.pts+=3;saveMeta();}
  S.won=true;
- showModal('🏆 ZAFER: Kül Tarikatı Sona Erdi','Destekçisi '+(by==='vassal'?'boyun eğince':'yıkılınca')+' Kül Tarikatı\'nın tüm bağları koptu. Kamplar söndü, fanatikler dağıldı. Aldora\'nın Mirası artık güvende.\n\nÖdül: 2500 altın, 500 demir, +3 miras puanı.\n\nOyunu burada bitirip skorunu kaydedebilir ya da krallığını yönetmeye devam edebilirsin.',[
-  {t:'Devam et (serbest oyun)'},
-  {t:'Bitir ve skoru kaydet',fn:()=>{S.done=true;if(typeof recScore==='function')recScore();showModal('📜 Efsane Tamamlandı','Skorun kaydedildi. Ana menüden yeni bir oyuna başlayabilirsin.',[{t:'Yeni oyun',fn:()=>{try{localStorage.removeItem('ky_save');}catch(e){}newGameSetup(uiReset);}}]);}}]);
+ showModal('🏆 ZAFER: Kül Tarikatı Sona Erdi','Destekçisi '+(by==='vassal'?'boyun eğince':'yıkılınca')+' Kül Tarikatı\'nın tüm bağları koptu. Kamplar söndü, fanatikler dağıldı. Aldora\'nın Mirası artık güvende.\n\nÖdül: 2500 altın, 500 demir, +3 miras puanı.\n\n📖 Hikâye bitmedi: Kadim topraklarda güç dengesi senden yana. Vasalların sana bağlanırsa İmparatorluk ilan edebilir, sonra gemilerle haritanın ötesindeki YENİ DÜNYAYA açılabilirsin. Orada seni tanımayan başka halklar ve rakip hükümdarlar var.\n\nİstersen hikâyeyi burada bırakıp skorunu da kaydedebilirsin.',[
+  {t:'Hikâye sürüyor'},
+  {t:'Burada bitir ve skoru kaydet',fn:()=>{S.done=true;if(typeof recScore==='function')recScore();showModal('📜 Efsane Tamamlandı','Skorun kaydedildi. Ana menüden yeni bir oyuna başlayabilirsin.',[{t:'Yeni oyun',fn:()=>{try{localStorage.removeItem('ky_save');}catch(e){}newGameSetup(uiReset);}}]);}}]);
 }
 // ---- kaçak lider (mini patron) ----
 function egBoss(i){
@@ -143,9 +143,9 @@ function egEnds(){
  const kd=S.kings.slice(0,6);
  const allDead=kd.every(k=>k.dead);
  const allBound=kd.every(k=>k.dead?false:(k.vassal||k.pact==='ittifak'));
- if(!E.ends.fetih&&allDead){E.ends.fetih=1;showModal('⚔ SON: FETİH','Hiçbir krallık ayakta kalmadı. Aldora\'nın bayrağı bütün topraklarda dalgalanıyor. Korkuyla örülmüş bir barış...\n\nOyun devam ediyor; istersen yeni hedefler seç.',[{t:'Devam'}]);}
- if(!E.ends.birlik&&allBound){E.ends.birlik=1;showModal('🕊 SON: BİRLİK','Tüm krallıklar ya vasalın ya da müttefikin. Kılıç yerine söz ve ticaret hüküm sürüyor. Tarihe "Barışçı Taç" olarak geçeceksin.',[{t:'Devam'}]);}
- if(!E.ends.altin&&E.heritage&&S.happy>=85&&popNow()>=150&&S.res.gold>=3000){E.ends.altin=1;showModal('🌟 SON: ALTIN ÇAĞ','Halk mutlu, ambarlar dolu, hazine taşıyor. Aldora\'nın Mirası gerçek oldu: refah çağı başladı.',[{t:'Devam'}]);}
+ if(!E.ends.fetih&&allDead){E.ends.fetih=1;showModal('⚔ YOL: FETİH','Hiçbir krallık ayakta kalmadı. Aldora\'nın bayrağı bütün topraklarda dalgalanıyor. Korkuyla örülmüş bir barış...\n\n📖 Ama hikâye bitmedi: fetihçi olarak da İmparatorluk ilan edebilir ve denizin ötesindeki yeni dünyaya açılabilirsin.',[{t:'Hikâye sürüyor'}]);}
+ if(!E.ends.birlik&&allBound){E.ends.birlik=1;showModal('🕊 YOL: BİRLİK','Tüm krallıklar ya vasalın ya da müttefikin. Kılıç yerine söz ve ticaret hüküm sürüyor. Tarihe "Barışçı Taç" olarak geçeceksin.\n\n📖 Sıradaki adım: İmparatorluk ilanı ve ardından Büyük Keşif.',[{t:'Hikâye sürüyor'}]);}
+ if(!E.ends.altin&&E.heritage&&S.happy>=85&&popNow()>=150&&S.res.gold>=3000){E.ends.altin=1;showModal('🌟 YOL: ALTIN ÇAĞ','Halk mutlu, ambarlar dolu, hazine taşıyor. Aldora\'nın Mirası gerçek oldu: refah çağı başladı.\n\n📖 Güçlü bir imparatorluk için artık hazırsın.',[{t:'Hikâye sürüyor'}]);}
 }
 if(typeof ACH!=='undefined'){
  ACH.push({id:'endF',n:'Fatih',d:'Fetih sonu: tüm krallıkları yok et',ok:()=>S.eg&&S.eg.ends&&S.eg.ends.fetih});

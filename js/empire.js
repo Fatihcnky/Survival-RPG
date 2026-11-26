@@ -22,7 +22,7 @@ function egDec(){egS();S.eg.dec=S.eg.dec||{vergi:1,tarim:0,orman:0};return S.eg.
 const DECN={vergi:['Vergi','Düşük (+4 mutluluk, gelir yok)','Normal','Yüksek (+altın, -8 mutluluk)'],tarim:['Tarım teşviki','20💰/gün, çiftlik başı +3 yiyecek'],orman:['Orman teşviki','10💰/gün, oduncu başı +6 odun']};
 function empireOK(){
  const E=egS();const v=S.kings.filter(k=>k.vassal&&!k.dead).length;
- return {v,ok:S.rank>=4&&E.heritage&&countB('saray',true)>0&&v>=3&&!E.empire};
+ return {v,ok:S.rank>=4&&E.heritage&&countB('saray',true)>0&&(v>=3||E.ends.fetih)&&!E.empire};
 }
 function empireDay(){
  if(!S.founded)return;const E=egS(),d=egDec();
@@ -67,7 +67,7 @@ function stateBlock(){
   if(a==='dtarim'){const d=egDec();d.tarim=d.tarim?0:1;updPanel(true);return;}
   if(a==='dorman'){const d=egDec();d.orman=d.orman?0:1;updPanel(true);return;}
   if(a==='empire'){const em=empireOK();if(em.ok&&S.res.gold>=2500){S.res.gold-=2500;S.eg.empire=1;
-   showModal('👑 İMPARATORLUK','Vasal krallar sarayında diz çöktü. Taç artık imparatorluk tacı. '+rulerTitle()+' '+S.dyn.ruler.name+' İmparator ilan edildi!\n\nVasallardan ek haraç gelecek, ama sadakatleri biraz daha çabuk düşecek. İdareni sürdür.',[{t:'Yaşasın!'}]);}
+   showModal('👑 İMPARATORLUK','Vasal krallar sarayında diz çöktü. Taç artık imparatorluk tacı. '+rulerTitle()+' '+S.dyn.ruler.name+' İmparator ilan edildi!\n\nVasallardan ek haraç gelecek, ama sadakatleri biraz daha çabuk düşecek. İdareni sürdür.\n\n📖 Ama haritanın ötesinde başka halklar ve hükümdarlar var, onlar seni tanımıyor. Bir Liman kur, "Büyük Gemiler"i araştır ve Büyük Keşif seferini başlat (Durum sekmesi).',[{t:'Yaşasın!'}]);}
    updPanel(true);return;}
   return _a(a,v,w,el);};
  const _od=onDay;onDay=function(){_od.apply(null,arguments);try{empireDay();}catch(e){console.error(e);}};

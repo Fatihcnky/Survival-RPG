@@ -295,7 +295,7 @@ function destroyB(b,a){
  if(b.t==='karakale'){
   S.sf=S.sf||{};S.sf.maldricDead=1;
   if(a&&(a.team==='p'||a.team==='a')){addRes('gold',1500);}
-  showModal('🏆 Zafer! Kara Kale Düştü','Kara Kale yıkıldı ve Lord Maldric\'in bayrağı sökülüp ateşe verildi. Aldora\'nın halkı sokaklarda sevinç çığlıkları atıyor.\n\nBertram titreyen elleriyle babanın yüzüğünü parmağına geçiriyor: "Taç artık gerçekten senin."\n\nOyunu tamamladın! İstersen krallığını yönetmeye devam edebilirsin: komşu krallıklar, ticaret ve yeni tehditler seni bekliyor. (+1500 altın)',[{t:'Krallığa devam'}]);
+  showModal('🏆 Zafer! Kara Kale Düştü','Kara Kale yıkıldı ve Lord Maldric\'in bayrağı sökülüp ateşe verildi. Aldora\'nın halkı sokaklarda sevinç çığlıkları atıyor.\n\nBertram titreyen elleriyle babanın yüzüğünü parmağına geçiriyor: "Taç artık gerçekten senin."\n\nAma Maldric\'in sandığından kül renkli bir mühür çıktı. Onun arkasında daha büyük bir el var... Hikâye yeni başlıyor: kadim kalıntılar, gizemli bir tarikat, bir imparatorluk ve denizin ötesindeki yeni dünya seni bekliyor. (+1500 altın)',[{t:'Hikâye sürüyor'}]);
  }else if(b.t==='tent'){
   const c=S.camps.find(c=>c.tent===b.id);
   if(c){

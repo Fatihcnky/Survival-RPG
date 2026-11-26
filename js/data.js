@@ -207,5 +207,12 @@ const STORY=[
  {t:'"Lordluk" ünvanını kazan.',ok:()=>S.rank>=3,r:{gold:400},m:'Artık topraklarının efendisisin.'},
  {t:'Nüfusunu 100\'e çıkar.',ok:()=>popNow()>=100,r:{gold:300,food:300},m:'Yüz kişi... Bir zamanlar küçücük bir kafile olan halkın artık bir şehir kadar kalabalık.'},
  {ch:'Final — Taç',t:'Krallığını ilan et: "Krallık" ünvanına yüksel.',ok:()=>S.rank>=4,m:'Taç giydin ama Maldric hâlâ ayakta...'},
- {ch:'Son — Kara Kale',t:'Haritanın uzak köşesindeki Maldric\'in Kara Kale\'sini yık. Güçlü bir ordu ve toplar getir!',ok:()=>S.sf&&S.sf.maldricDead,m:'Maldric düştü, taç sonunda gerçek sahibinde. Aldora yeniden doğdu!'}
+ {ch:'Son — Kara Kale',t:'Haritanın uzak köşesindeki Maldric\'in Kara Kale\'sini yık. Güçlü bir ordu ve toplar getir!',ok:()=>S.sf&&S.sf.maldricDead,m:'Maldric düştü, taç sonunda gerçek sahibinde. Aldora yeniden doğdu!\n\nAma Bertram, Maldric\'in sandığındaki kül renkli mühre bakıp solgun: "Bu, bitmedi."'},
+  {ch:'Bölüm 7 — Küllerin Ötesi',t:'Aldora\'nın 5 kadim kalıntısını bul ve topla (her birini bekçiler koruyor).',ok:()=>!!(S.eg&&S.eg.heritage),m:'Beş kalıntı bir araya gelince Aldora\'nın Mirası uyandı. Eski krallığın gücü artık sende, ama onu kıskananlar da var.'},
+  {t:'Kül Tarikatı\'nın arkasındaki krallığı ortaya çıkar ve yok et ya da boyun eğdir.',ok:()=>!!(S.eg&&S.eg.cultEnded),m:'Tarikatın bağları koptu. Kadim topraklarda artık sana kafa tutacak kimse yok. Peki ya haritanın ötesinde?'},
+  {ch:'Bölüm 8 — İmparator',t:'Saray kur, krallıkları vasal yap ve İmparatorluğunu ilan et.',ok:()=>!!(S.eg&&S.eg.empire),m:'Tahtın artık bir imparatorluk tahtı. Ama fısıltılar yayılıyor: denizin ötesinde başka tahtlar, başka imparatorlar var ve seni tanımıyorlar.'},
+  {t:'Büyük Keşif: Liman kur, Büyük Gemiler araştır ve haritanın ötesine sefer çıkar.',ok:()=>!!S.world,m:'Gemilerin yeni kıtaya ulaştı: bozkırlar, vahalar, dağlar, adalar ve Aldora\'nın gerçek mirasçıları seni bekliyor.'},
+  {ch:'Bölüm 9 — Yeni Dünya',t:'Yeni dünyadan 2 halkı imparatorluğunu tanımaya ikna et (Kabul Ettirme).',ok:()=>(S.stats.acc||0)>=2,r:{gold:1500},m:'İki halk imparatorluğunu tanıdı. Haberler yayılıyor, ama Aldora\'nın sahte mirasçısı bunu kabullenmeyecek.'},
+  {t:'Aldora\'nın sahte mirasçısı "Karşı Taç"ı yen.',ok:()=>!!(S.eg&&S.eg.bosses&&S.eg.bosses.some(b=>b.n==='Karşı Taç'&&b.done)),r:{gold:1500},m:'Sahte taç ezildi. Yeni dünyanın halkları artık seni ciddiye alıyor.'},
+  {ch:'Final — Dünya İmparatoru',t:'Yeni dünyanın 5 halkının hepsini kabul ettir.',ok:()=>(S.stats.acc||0)>=5,m:'Bozkırdan adalara, dağlardan vahalara kadar bütün halklar tacını tanıdı. İki kıta, tek imparatorluk. Tarih seni "Dünya İmparatoru" diye yazacak.'}
 ];

@@ -86,7 +86,7 @@ function expandWorld(){
  revealC(236,112,14);revealC(112,236,14);
  for(let i=0;i<NN;i++)if(FOG[i]===2)FOG[i]=1;
  clampCam();
- showModal('🌍 YENİ DÜNYA','Büyük Keşif seferi döndü! Haritanın ötesinde engin topraklar var: doğuda bozkırlar, güneyde vahalar, kıyılarda limanlar, uzakta gizemli bir miras.\n\nBeş yeni halk var: Bozkır Konfederasyonu, Kum Şehirleri Birliği, Dağ Klanları, Ada Denizcileri ve Kadim Aldora Mirasçıları. Onlar seni imparator olarak tanımıyor. Kabul ettirmek için diplomasi menüsündeki "Kabul Ettirme" yollarını kullan.',[{t:'Keşfe çık'}]);
+ showModal('🌍 YENİ DÜNYA','Büyük Keşif seferi döndü! Haritanın ötesinde engin topraklar var: doğuda bozkırlar, güneyde vahalar, kıyılarda limanlar, uzakta gizemli bir miras.\n\nBeş yeni halk var: Bozkır Konfederasyonu, Kum Şehirleri Birliği, Dağ Klanları, Ada Denizcileri ve Kadim Aldora Mirasçıları. Onlar seni imparator olarak tanımıyor; her birinin kendi kağanı, kralı ya da kâhini var. Kabul ettirmek için diplomasi menüsündeki "Kabul Ettirme" yollarını kullan.',[{t:'Keşfe çık'}]);
  log('🌍 Harita büyüdü: yeni krallıklar keşfedilebilir.');
 }
 // bölge tonu
